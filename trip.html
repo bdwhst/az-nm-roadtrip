@@ -58,6 +58,15 @@ html,body{margin:0;height:100%;font-family:-apple-system,"PingFang SC","Noto San
 .axis .ticks span{position:absolute;transform:translateX(-50%);font-size:10px;color:var(--ink3)}
 .grid{position:absolute;inset:0;pointer-events:none}
 .grid i{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+#cost{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.cost-box{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;max-width:720px;width:100%;max-height:90vh;overflow:auto;padding:14px 18px 18px}
+.cost-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:15px}
+.cost-box .x{border:0;background:none;font-size:22px;cursor:pointer;color:var(--ink2)}
+.cost-box table{border-collapse:collapse;width:100%;font-size:12.5px;margin:6px 0 12px}
+.cost-box th,.cost-box td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.cost-box th{background:var(--panel);font-weight:600}
+.cost-box .tbd{color:var(--ink3);font-style:italic}
+.cost-box .meta{color:var(--ink3);font-size:11.5px}
 #tip{position:fixed;z-index:9999;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 9px;border-radius:5px;font-size:12px;max-width:280px;display:none;line-height:1.4}
 .num{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--stay);color:#fff;font-size:11px;text-align:center;line-height:20px;font-weight:bold;box-shadow:0 0 0 2px #fff}
 .num.dim{opacity:.45}
@@ -73,13 +82,19 @@ html,body{margin:0;height:100%;font-family:-apple-system,"PingFang SC","Noto San
     <h1>美西南自驾 · 12/24 → 1/3</h1>
     <div class="seg" id="plans"></div>
     <div id="days"></div>
-    <div class="seg" style="margin-left:auto"><button id="themeBtn" title="切换深色/浅色">◐</button></div>
+    <div class="seg" style="margin-left:auto"><button id="costBtn">费用</button><button id="themeBtn" title="切换深色/浅色">◐</button></div>
   </div>
   <div id="side"></div>
   <div id="map"></div>
   <div id="gantt"></div>
 </div>
 <div id="tip"></div>
+<div id="cost" hidden>
+  <div class="cost-box">
+    <div class="cost-head"><b>租车 / 机票费用</b><button id="costClose" class="x" aria-label="关闭">×</button></div>
+    <div id="costBody"></div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="trip_routes.js"></script>
@@ -255,6 +270,41 @@ const PLANS={
 };
 const DIRT=new Set(["farmington_ahshislepah","ahshislepah_vod","vod_nageezi"]); // 土路路段（地图上画虚线）
 const TYPE={drive:["开车","--drive"],dirt:["土路","--drive"],play:["游玩","--play"],meal:["用餐","--meal"],log:["手续 / 机场 / 入住","--log"],rest:["休整","--rest"],fly:["航班","--fly"]};
+
+/* ===================== 数据：费用（null = 待查） =====================
+ 价格单位 USD；quotedOn 填报价日期；每条 note 写清来源 */
+const RENTAL={
+ orig:{title:"原方案：Avis 一辆车 PHX → ELP，12/24 13:00 → 1/3 15:00（10 天）",
+  rows:[
+   {k:"车型",v:null,note:"中型 / 标准 SUV（Bisti、Ah-Shi-Sle-Pah 土路需要底盘高）"},
+   {k:"基础租金（10 天）",v:null,note:"税前日租 × 天数"},
+   {k:"异地还车费（One-way / Intercity fee）",v:null,note:"Avis 多数网点不单列，而是抬日租价或改为按里程收费；看税费明细里有没有这一行"},
+   {k:"里程",v:null,note:"确认是 unlimited；若按里程收，≈1,700 mi × $0.29–0.30 ≈ $500"},
+   {k:"税费 / 机场附加费",v:null,note:"PHX 机场 concession fee 约 11%，另有 vehicle license fee 等"},
+   {k:"合计",v:null,note:""}],
+  compare:{k:"对照：同车型 PHX → PHX 同期往返报价",v:null,note:"两个报价之差就是异地还车实际多付的钱"},
+  quotedOn:null},
+ fly:{title:"飞 ABQ 方案：车 ① PHX 往返 4 天 + ✈ PHX→ABQ + 车 ② ABQ → ELP 6 天",
+  rows:[
+   {k:"车 ① PHX → PHX，12/24 → 12/28（4 天）",v:null,note:"往返，无 one-way 费"},
+   {k:"机票 PHX → ABQ 12/28 下午",v:null,note:"按人头，Southwest / American；写总价"},
+   {k:"车 ② ABQ → ELP，12/28 → 1/3（6 天）",v:null,note:"同区域短途 one-way"},
+   {k:"合计",v:null,note:""}],
+  compare:null,quotedOn:null}
+};
+const usd=v=>v==null?'<span class="tbd">待查</span>':(typeof v==="number"?"$"+v.toLocaleString(undefined,{maximumFractionDigits:0}):v);
+function renderCost(){
+  const body=document.getElementById("costBody");
+  body.innerHTML=Object.values(RENTAL).map(r=>`<h3 style="font-size:13.5px;margin:10px 0 2px">${r.title}</h3>
+   <table><tr><th style="width:42%">项目</th><th style="width:16%">金额</th><th>说明</th></tr>
+   ${r.rows.map(x=>`<tr><td>${x.k}</td><td>${usd(x.v)}</td><td class="meta">${x.note||""}</td></tr>`).join("")}
+   ${r.compare?`<tr><td><i>${r.compare.k}</i></td><td>${usd(r.compare.v)}</td><td class="meta">${r.compare.note}</td></tr>`:""}</table>
+   <div class="meta">${r.quotedOn?"报价日期 "+r.quotedOn:"尚未查询报价"}</div>`).join("")+
+   `<div class="meta" style="margin-top:10px">说明：Avis 公开价和谷歌员工租车 portal 的企业价不同，portal 价以用户自己跑的报价为准。Enterprise / National 机场之间的 one-way 通常不收 drop charge，可作对照。</div>`;
+}
+document.getElementById("costBtn").onclick=()=>{renderCost();document.getElementById("cost").hidden=false};
+document.getElementById("costClose").onclick=()=>document.getElementById("cost").hidden=true;
+document.getElementById("cost").addEventListener("click",e=>{if(e.target.id==="cost")e.target.hidden=true});
 
 /* ===================== 工具 ===================== */
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
