@@ -344,7 +344,7 @@ let osmErr=0;osm.on("tileerror",()=>{if(++osmErr>=4&&map.hasLayer(osm)){map.remo
 L.control.layers({"OpenStreetMap（与路线同源，放大最准）":osm,"Esri 地形":esri,"Esri 街道":esriStreet,"卫星图":esriSat,"OpenTopoMap":topo},null,{position:"topright"}).addTo(map);
 const casingLayer=L.layerGroup().addTo(map), routeLayer=L.layerGroup().addTo(map), poiLayer=L.layerGroup().addTo(map), hlLayer=L.layerGroup().addTo(map);
 const lineW=()=>map.getZoom()>=13?8:map.getZoom()>=10?6:5;   // 当天路线线宽随缩放加粗
-map.on("zoomend",()=>{const w=lineW();routeLayer.eachLayer(l=>{if(l._on)l.setStyle({weight:w})});casingLayer.eachLayer(l=>l.setStyle({weight:w+4}))});
+map.on("zoomend",()=>{const w=lineW();routeLayer.eachLayer(l=>{if(l._dayOn)l.setStyle({weight:w})});casingLayer.eachLayer(l=>l.setStyle({weight:w+4}))});
 const legend=L.control({position:"bottomleft"});
 legend.onAdd=()=>{const d=L.DomUtil.create("div","legend");d.innerHTML=`<span style="color:${css("--drive")}">━</span> 当天路线（OSM 路网，OSRM 计算）&nbsp; <span style="color:${css("--drive")}">┅</span> 土路 &nbsp; <span style="color:${css("--fly")}">┅</span> 航班<br><span style="color:${css("--route-dim")}">━</span> 其他天 &nbsp; <span class="num" style="width:16px;height:16px;line-height:16px;font-size:10px;box-shadow:none">1</span> 住宿 &nbsp; <span style="color:#2e7d32">●</span> 景点（点开有图）`;return d};
 legend.addTo(map);
@@ -362,7 +362,7 @@ function draw(){
     d.blocks.forEach(b=>{
       (b.leg||[]).forEach(id=>{
         const pl=legLine(id,on?{color:drC,weight:W,opacity:1,dashArray:DIRT.has(id)?"6 10":null,lineCap:"round",lineJoin:"round"}:{color:dimC,weight:2.5,opacity:.6});
-        if(!pl)return;pl._on=on;pl.addTo(routeLayer);if(on){bounds.push(...pl.getLatLngs());legLine(id,{color:"#fff",weight:W+4,opacity:.9,lineCap:"round",lineJoin:"round",interactive:false}).addTo(casingLayer)}
+        if(!pl)return;pl._dayOn=on;pl.addTo(routeLayer);if(on){bounds.push(...pl.getLatLngs());legLine(id,{color:"#fff",weight:W+4,opacity:.9,lineCap:"round",lineJoin:"round",interactive:false}).addTo(casingLayer)}
         const r=ROUTES[id];
         pl.bindTooltip(`<b>${b.title}</b><br>${d.date} ${b.t}<br>${r.mi} mi · OSRM 估 ${fmtH(r.h)}（偏保守）`,{sticky:true});
         pl.on("mouseover",()=>pl.setStyle({weight:on?lineW()+3:5}));pl.on("mouseout",()=>pl.setStyle({weight:on?lineW():2.5}));
