@@ -161,12 +161,13 @@ const day_gc_to_page=(date,dow)=>D(date,dow,"Page","17:18",[
  B("17:45-18:00","drive","回 Page 入住",{leg:["horseshoe_page"]}),
  B("18:15-19:30","meal","晚餐",{poi:"page",n:"Glen Canyon Dam 观景点改为可选：第二天出发前顺路 10 分钟"})]);
 const day_mv=D("12/28","一","Monument Valley","17:15",[
- B("10:00-12:15","drive","Page → AZ-98 → US-160 → Kayenta → US-163 → Monument Valley",{leg:["page_mv"],n:"125 mi · 2.25 h"}),
- B("12:15-14:00","play","17 英里自驾环线：John Ford's Point、Artist's Point",{poi:"mvview",n:"冬季环线只开 8:00–14:00，12:30 前必须进；时间紧就改订下午 Navajo 导游团（不受 14:00 限制，还能进后山）；门票 $8/人，国家公园年票无效"}),
- B("14:00-15:00","meal","The View 餐厅午餐 · 入住",{poi:"mv"}),
- B("15:00-15:30","drive","→ Forrest Gump Point",{leg:["mv_forrestgump"]}),
- B("15:30-16:00","play","Forrest Gump Point 标准机位（US-163 路中间拍，注意来车）",{poi:"forrestgump"}),
- B("16:00-16:30","drive","回 Monument Valley",{leg:["forrestgump_mv"]}),
+ B("09:00-11:15","drive","Page → AZ-98 → US-160 → Kayenta → US-163 → Monument Valley",{leg:["page_mv"],n:"125 mi · 2.25 h；出发前可顺路 Glen Canyon Dam 观景点 10 min"}),
+ B("11:15-13:15","play","17 英里自驾环线：John Ford's Point、Artist's Point、Totem Pole",{poi:"mvview",n:"冬季环线只开 8:00–14:00；砾石路普通车可走，雪后泥泞另说；门票 $8/人，国家公园年票无效"}),
+ B("13:15-14:15","meal","The View 餐厅午餐 · 入住",{poi:"mv"}),
+ B("14:30-15:00","drive","→ Forrest Gump Point",{leg:["mv_forrestgump"]}),
+ B("15:00-15:30","play","Forrest Gump Point 标准机位（US-163 路中间拍，注意来车）",{poi:"forrestgump"}),
+ B("15:30-16:00","drive","回 Monument Valley",{leg:["forrestgump_mv"]}),
+ B("16:00-16:30","rest","休整",{poi:"mv"}),
  B("16:30-17:30","play","观景台 / 房间阳台看日落",{poi:"mvview",n:"日落约 17:15"}),
  B("18:00-19:30","meal","晚餐（The View 或 Goulding's）",{poi:"mv"})],"圣诞周 The View / Goulding's 常满房，先订");
 const day_page_fly=(date,dow)=>D(date,dow,"Page","17:19",[
@@ -179,29 +180,30 @@ const day_page_fly=(date,dow)=>D(date,dow,"Page","17:19",[
  B("18:00-19:30","meal","晚餐",{poi:"page"})]);
 const day_to_farmington_orig=D("12/29","二","Farmington","16:58",[
  B("07:15-07:50","play","（可选）阳台 / 观景台看日出，Mittens 剪影",{poi:"mvview",n:"日出约 7:30，看完回去接着睡"}),
- B("10:00-12:00","drive","Monument Valley → Kayenta → US-160 → Four Corners",{leg:["mv_fourcorners"],n:"97 mi · 2 h"}),
- B("12:00-12:30","play","Four Corners Monument",{poi:"fourcorners",n:"Navajo Parks 管理，元旦前后开放时间先查；想多留 Bisti 时间可跳过"}),
- B("12:30-14:30","drive","Four Corners → US-64 → Shiprock 远眺 → Farmington",{leg:["fourcorners_farmington"],n:"96 mi"}),
- B("14:30-15:00","meal","Farmington 快午餐 / 打包",{poi:"farmington"}),
- B("15:00-15:45","drive","Farmington → NM-371 南 → Bisti 停车场",{leg:["farmington_bisti"],n:"36 mi，最后 2 mi 砾石路，普通车可到"}),
- B("15:45-17:15","play","Bisti Badlands：只走 Cracked Eggs 近线，看日落",{poi:"bisti",n:"只有 1.5 h，走不到 Wings；无步道，提前下载 GPS 轨迹；日落 16:58；雨雪后泥路不可走"}),
+ B("09:00-11:00","drive","Monument Valley → Kayenta → US-160 → Four Corners",{leg:["mv_fourcorners"],n:"97 mi · 2 h"}),
+ B("11:00-11:30","play","Four Corners Monument",{poi:"fourcorners",n:"Navajo Parks 管理，元旦前后开放时间先查"}),
+ B("11:30-13:30","drive","Four Corners → US-64 → Shiprock 远眺 → Farmington",{leg:["fourcorners_farmington"],n:"96 mi"}),
+ B("13:30-14:00","meal","Farmington 快午餐",{poi:"farmington"}),
+ B("14:00-14:45","drive","Farmington → NM-371 南 → Bisti 停车场",{leg:["farmington_bisti"],n:"36 mi，最后 2 mi 砾石路，普通车可到"}),
+ B("14:45-17:15","play","Bisti Badlands：Cracked Eggs / Wings，看日落",{poi:"bisti",n:"无步道，提前下载 GPS 轨迹；日落 16:58；雨雪后泥路不可走"}),
  B("17:15-18:00","drive","回 Farmington",{leg:["bisti_farmington"]}),
  B("18:15-19:30","meal","晚餐 · 入住",{poi:"farmington"})],"天气是一票否决：下雨下雪就不去 Bisti，改 Farmington 休整");
 const day_to_farmington_fly=D("12/29","二","Farmington","16:58",[
- B("10:00-13:15","drive","Albuquerque → US-550（Cuba、Nageezi）→ Farmington",{leg:["oldtown_farmington"],n:"184 mi · 3 h"}),
- B("13:15-14:00","meal","Farmington 午餐 · 放行李",{poi:"farmington"}),
+ B("09:00-12:15","drive","Albuquerque → US-550（Cuba、Nageezi）→ Farmington",{leg:["oldtown_farmington"],n:"184 mi · 3 h"}),
+ B("12:15-13:00","meal","Farmington 午餐 · 放行李",{poi:"farmington"}),
+ B("13:00-14:00","rest","休整",{poi:"farmington"}),
  B("14:00-14:45","drive","Farmington → NM-371 南 → Bisti 停车场",{leg:["farmington_bisti"],n:"36 mi，最后 2 mi 砾石路，普通车可到"}),
  B("14:45-17:15","play","Bisti Badlands：Cracked Eggs / Wings，看日落",{poi:"bisti",n:"无步道，提前下载 GPS 轨迹；日落 16:58；雨雪后泥路不可走"}),
  B("17:15-18:00","drive","回 Farmington",{leg:["bisti_farmington"]}),
  B("18:15-19:30","meal","晚餐 · 入住",{poi:"farmington"})],"天气是一票否决：下雨下雪就不去 Bisti，改 Farmington 休整");
 const day_badlands=D("12/30","三","Santa Fe","16:56",[
- B("10:00-12:00","dirt","Farmington → NM-371 → CR 7650 土路 → Ah-Shi-Sle-Pah 停车场",{leg:["farmington_ahshislepah"],n:"65 mi，后半土路；高底盘车"}),
- B("12:00-13:15","play","Ah-Shi-Sle-Pah · King of Wings（来回 3 mi）",{poi:"ahshislepah",n:"带上午餐路上吃"}),
- B("13:15-13:45","dirt","→ Valley of Dreams 停车场",{leg:["ahshislepah_vod"],n:"Navajo Nation 地界，要 backcountry permit"}),
- B("13:45-14:45","play","Valley of Dreams（停车场到岩柱区 15 min）",{poi:"valleyofdreams"}),
- B("14:45-18:00","drive","Valley of Dreams → NM-57 土路 → US-550 → Santa Fe",{leg:["vod_nageezi","nageezi_santafe"],n:"前 1 h 是 NM-57 土路，15:45 前走完（日落 16:56）；到 US-550 后 2.5 h 铺装路"}),
- B("18:00-19:00","play","Santa Fe Plaza / Canyon Road 圣诞灯饰",{poi:"santafe"}),
- B("19:00-20:15","meal","晚餐 · 入住",{poi:"santafe"})],"10 点出发后这天最紧：两个荒野点各留 1 h 出头。想宽松就砍 Ah-Shi-Sle-Pah 只去 Valley of Dreams，或反过来");
+ B("09:00-11:00","dirt","Farmington → NM-371 → CR 7650 土路 → Ah-Shi-Sle-Pah 停车场",{leg:["farmington_ahshislepah"],n:"65 mi，后半土路；高底盘车"}),
+ B("11:00-12:30","play","Ah-Shi-Sle-Pah · King of Wings（来回 3 mi）",{poi:"ahshislepah"}),
+ B("12:30-13:00","dirt","→ Valley of Dreams 停车场",{leg:["ahshislepah_vod"],n:"Navajo Nation 地界，要 backcountry permit；午餐带着路上吃"}),
+ B("13:00-14:15","play","Valley of Dreams（停车场到岩柱区 15 min）",{poi:"valleyofdreams"}),
+ B("14:15-17:30","drive","Valley of Dreams → NM-57 土路 → US-550 → Santa Fe",{leg:["vod_nageezi","nageezi_santafe"],n:"前 1 h 是 NM-57 土路，天黑前走完；到 US-550 后 2.5 h 铺装路"}),
+ B("17:30-18:30","play","Santa Fe Plaza / Canyon Road 圣诞灯饰（天黑正好）",{poi:"santafe"}),
+ B("18:45-20:00","meal","晚餐 · 入住",{poi:"santafe"})],"三个荒野点优先级 Bisti > Valley of Dreams > Ah-Shi-Sle-Pah；路况差就砍后者");
 const day_to_alamogordo=D("12/31","四","Alamogordo","17:03",[
  B("10:00-11:00","play","Santa Fe 老城：Plaza、Loretto Chapel",{poi:"santafe"}),
  B("11:00-12:50","drive","Santa Fe → I-25 南 → Socorro",{leg:["santafe_socorro"],n:"139 mi"}),
@@ -242,13 +244,13 @@ const PLANS={
  fly:{name:"飞 ABQ 方案：PHX 往返 + ✈ + ABQ → ELP",days:[
    day_phx_arrive(" ①"),day_to_gc("12/25","五","圣诞节：大峡谷正常开，Tusayan 餐厅要订"),day_gc_to_page("12/26","六"),day_page_fly("12/27","日"),
    D("12/28","一","Albuquerque Old Town","17:00",[
-     B("10:00-14:30","drive","Page → US-89 → Flagstaff → I-17 → PHX",{leg:["page_phx"],n:"282 mi · 4.5 h"}),
-     B("14:30-15:00","log","PHX 还车 ①",{poi:"phx"}),
-     B("15:00-17:30","log","安检 · 午餐 · 候机",{poi:"phx",n:"航班时间按 17:30 假设，查 Southwest / American 傍晚班"}),
-     B("17:30-18:50","fly","✈ PHX → ABQ（1 h 20）",{fly:["phx","abq"]}),
-     B("18:50-19:30","log","ABQ 取车 ②",{poi:"abq"}),
-     B("19:30-19:50","drive","ABQ → Old Town",{leg:["abq_oldtown"]}),
-     B("20:00-21:00","meal","Old Town 晚餐 · 入住",{poi:"abqoldtown"})],"全程最累的一天：开车 4.5 h + 还车 + 飞行 + 取车，到酒店 20 点"),
+     B("09:00-13:30","drive","Page → US-89 → Flagstaff → I-17 → PHX",{leg:["page_phx"],n:"282 mi · 4.5 h"}),
+     B("13:30-14:00","log","PHX 还车 ①",{poi:"phx"}),
+     B("14:00-16:30","log","安检 · 午餐 · 候机",{poi:"phx",n:"航班时间按 16:30 假设，查 Southwest / American 下午班"}),
+     B("16:30-17:50","fly","✈ PHX → ABQ（1 h 20）",{fly:["phx","abq"]}),
+     B("17:50-18:30","log","ABQ 取车 ②",{poi:"abq"}),
+     B("18:30-18:50","drive","ABQ → Old Town",{leg:["abq_oldtown"]}),
+     B("19:00-20:30","meal","Old Town 晚餐 · 入住",{poi:"abqoldtown"})],"全程最累的一天：开车 4.5 h + 还车 + 飞行 + 取车"),
    day_to_farmington_fly,day_badlands,day_to_alamogordo,day_to_carlsbad,day_caverns,day_to_elp(" ②")]}
 };
 const DIRT=new Set(["farmington_ahshislepah","ahshislepah_vod","vod_nageezi"]); // 土路路段（地图上画虚线）
