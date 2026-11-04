@@ -148,7 +148,7 @@ const POI={
  sedona:{n:"Sedona",ll:[34.8697,-111.7610],kind:"stay"},
  boynton:{n:"Boynton Canyon 步道口 → Subway Cave",ll:[34.9075,-111.8484],img:"boynton_canyon"},
  airportmesa:{n:"Airport Mesa 观景点",ll:[34.8557,-111.7823]},
- whitepocket:{n:"White Pocket（Vermilion Cliffs）",ll:[36.9560,-111.9000],img:"white_pocket"},
+ whitepocket:{n:"White Pocket 停车场（F 点）",ll:[36.95501,-111.893298],img:"white_pocket"},
  socorro:{n:"Socorro",ll:[34.0584,-106.8914]},
  carlsbad:{n:"Carlsbad",ll:[32.4207,-104.2288],kind:"stay"},
  caverns:{n:"Carlsbad Caverns 游客中心",ll:[32.1753,-104.4440],img:"carlsbad_caverns_big_room"},
@@ -289,13 +289,12 @@ const day_subway=D("12/26","六","Tusayan","17:19",[
  B("18:00-19:30","meal","晚餐（Tusayan）",{poi:"tusayan"})]);
 /* ---- 变体 B：White Pocket（砍掉圣诞缓冲日，Page 住两晚，12/27 导游团） ---- */
 const day_whitepocket=D("12/27","日","Page","17:18",[
- B("07:30-08:00","log","导游团 Page 集合（Jeep 接送）",{poi:"page",n:"出发时间由运营商定，一般 7–8 点；这天做不到 10 点出发"}),
- B("08:00-10:40","dirt","Page → US-89 → House Rock Valley Rd → BLM 1017/1087 深沙路 → White Pocket（团车）",{leg:["page_whitepocket"],n:"约 72 mi · 2 h 40（地图最后一段沙路为示意直线）；租的车别自己开：深沙必须真 4WD，雨雪后泥路封死；路况电话 BLM Kanab (435) 644-1200"}),
- B("10:40-13:40","play","White Pocket 徒步摄影（脑纹岩、白色漩涡）",{poi:"whitepocket",n:"不需要许可证（和 The Wave 不同）；午餐团里带"}),
- B("13:40-16:20","dirt","原路返回 Page（团车）",{leg:["whitepocket_page"]}),
- B("16:20-17:45","play","Wahweap Overlook 看日落 / 休整",{poi:"wahweap"}),
- B("18:00-19:30","meal","晚餐",{poi:"page"})],"导游团从 Page 或 Kanab 出发，7–8 h，每人约 $200–300，圣诞周提前订；天气差团会取消");
-
+ B("07:30-08:00","log","导游团 Page 集合（Jeep 接送）",{poi:"page",n:"出发时间由运营商定，一般 7–8 点；这天做不到 10 点出发。自驾的话在 Kanab / Page 租牧马人级别 4×4（越野车行取车时间固定、不等人）"}),
+ B("08:00-10:45","dirt","Page → US-89 → The Cockscomb → House Rock Valley Rd → C 点左拐 Pine Tree Rd → Big Sink Rd → White Pocket Rd",{leg:["page_whitepocket"],n:"约 75 mi · 2.75 h。小红书路书打点：C 36.86438,-112.062829（一定从这里拐，别信谷歌更北的岔口）→ D 36.843753,-111.962186（见 White Pocket 路牌左转，进沙地）→ 手动栅栏门，过后关好 → E 36.9015,-111.921298 → F 36.95501,-111.893298 停车场。Big Sink 遇私人牧场有‘请勿进入’的门，走 Pinnacle Vly Rd 左拐绕过去。C 点放胎压到 30 psi、挂 4-LO。最后 9 mi 深沙，F 点之后去脑纹岩还有 5–8 min 最深的沙，80% 陷车都在那一小段"}),
+ B("10:45-13:45","play","White Pocket 徒步摄影（脑纹岩 Brain Rock、白色漩涡）",{poi:"whitepocket",n:"不需要许可证（和 The Wave 不同）；几乎无信号，离线地图+截图路书；无人机可飞（FAA 适飞区）；午餐团里带。正午直光难拍，金色时间最好"}),
+ B("13:45-16:30","dirt","原路返回 Page（C 点之后也可走 89A，时间差不多、风景更好）",{leg:["whitepocket_page"],n:"回程最后 1 mi 沙地是陷车重灾区，别松懈；回到铺装路去加油站把胎压打回去（自助 $2.5）"}),
+ B("16:30-17:45","play","Wahweap Overlook 看日落 / 休整",{poi:"wahweap"}),
+ B("18:00-19:30","meal","晚餐",{poi:"page"})],"小红书 9 篇实测汇总：必须高底盘真 4×4（牧马人 / 烈马 / Tacoma 级），Jeep Compass 这种城市 SUV 陷车叫拖车 $700+ 等 3 h；带铲子、水和保暖衣；雨雪后泥路封死。导游团从 Page 或 Kanab 出发 7–8 h，$200–300/人，圣诞周提前订，天气差团会取消");
 const PLANS={
  orig:{name:"现方案",days:[
    day_phx_arrive(""),day_phx_xmas,day_to_gc("12/26","六"),day_gc_to_page("12/27","日"),day_mv,
