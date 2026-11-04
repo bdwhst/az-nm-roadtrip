@@ -357,19 +357,21 @@ function draw(){
   const P=PLANS[plan];const dimC=css("--route-dim"),drC=css("--drive"),flC=css("--fly");
   const bounds=[];
   // 其他天：灰色细线；当天：彩色粗线
-  P.days.forEach((d,i)=>{
-    const on=dayIdx===-1||dayIdx===i;
+  [false,true].forEach(pass=>P.days.forEach((d,i)=>{
+    const on=dayIdx===-1||dayIdx===i; if(on!==pass)return;   // 第一轮画其他天的灰线，第二轮画当天
     d.blocks.forEach(b=>{
       (b.leg||[]).forEach(id=>{
         const pl=legLine(id,on?{color:drC,weight:W,opacity:1,dashArray:DIRT.has(id)?"6 10":null,lineCap:"round",lineJoin:"round"}:{color:dimC,weight:2.5,opacity:.6});
-        if(!pl)return;pl._dayOn=on;pl.addTo(routeLayer);if(on){bounds.push(...pl.getLatLngs());legLine(id,{color:"#fff",weight:W+4,opacity:.9,lineCap:"round",lineJoin:"round",interactive:false}).addTo(casingLayer)}
+        if(!pl)return;pl._dayOn=on;
+        if(on){legLine(id,{color:"#fff",weight:W+4,opacity:.9,lineCap:"round",lineJoin:"round",interactive:false}).addTo(casingLayer);bounds.push(...pl.getLatLngs())}
+        pl.addTo(routeLayer);  // 描边先画、彩色线后画，保证线在描边之上
         const r=ROUTES[id];
         pl.bindTooltip(`<b>${b.title}</b><br>${d.date} ${b.t}<br>${r.mi} mi · OSRM 估 ${fmtH(r.h)}（偏保守）`,{sticky:true});
         pl.on("mouseover",()=>pl.setStyle({weight:on?lineW()+3:5}));pl.on("mouseout",()=>pl.setStyle({weight:on?lineW():2.5}));
       });
       if(b.fly){const a=arc(POI[b.fly[0]].ll,POI[b.fly[1]].ll);const pl=L.polyline(a,{color:on?flC:dimC,weight:on?3:2,dashArray:"8 7",opacity:.9}).addTo(routeLayer);pl.bindTooltip(`<b>${b.title}</b><br>${d.date} ${b.t}`,{sticky:true});if(on)bounds.push(...a)}
     });
-  });
+  }));
   // 住宿点编号
   const stays=[];P.days.forEach((d,i)=>{const prev=stays[stays.length-1];if(!d.stay.startsWith("—")&&(!prev||prev.stay!==d.stay))stays.push({stay:d.stay,i,ds:[i]});else if(prev&&prev.stay===d.stay)prev.ds.push(i)});
   const stayPoi=s=>Object.values(POI).find(p=>p.kind==="stay"&&(s.startsWith(p.n)||p.n.startsWith(s.split(" ")[0])));
