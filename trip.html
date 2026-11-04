@@ -59,6 +59,7 @@ html,body{margin:0;height:100%;font-family:-apple-system,"PingFang SC","Noto San
 .grid{position:absolute;inset:0;pointer-events:none}
 .grid i{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
 #cost{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+#cost[hidden]{display:none}
 .cost-box{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;max-width:720px;width:100%;max-height:90vh;overflow:auto;padding:14px 18px 18px}
 .cost-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:15px}
 .cost-box .x{border:0;background:none;font-size:22px;cursor:pointer;color:var(--ink2)}
@@ -304,6 +305,7 @@ function renderCost(){
 }
 document.getElementById("costBtn").onclick=()=>{renderCost();document.getElementById("cost").hidden=false};
 document.getElementById("costClose").onclick=()=>document.getElementById("cost").hidden=true;
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("cost").hidden=true});
 document.getElementById("cost").addEventListener("click",e=>{if(e.target.id==="cost")e.target.hidden=true});
 
 /* ===================== 工具 ===================== */
