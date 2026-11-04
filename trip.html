@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>美西南自驾 · 行程可视化</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --bg:#fcfcfb;--panel:#f4f3f0;--line:#e2e1dc;--ink:#0b0b0b;--ink2:#52514e;--ink3:#8a8984;--card:#ffffff;
+  --drive:#2a78d6;--play:#eb6834;--meal:#1baf7a;--log:#eda100;--fly:#4a3aa7;--rest:#b9b8b2;--route-dim:#9a9a94;
+  --stay:#1f4e79;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1a1a19;--panel:#222221;--line:#3a3a37;--ink:#fff;--ink2:#c3c2b7;--ink3:#8f8e88;--card:#262625;
+  --drive:#3987e5;--play:#d95926;--meal:#199e70;--log:#c98500;--fly:#9085e9;--rest:#5a5a56;--route-dim:#6a6a66;--stay:#6aa0d8}}
+:root[data-theme="dark"]{
+  --bg:#1a1a19;--panel:#222221;--line:#3a3a37;--ink:#fff;--ink2:#c3c2b7;--ink3:#8f8e88;--card:#262625;
+  --drive:#3987e5;--play:#d95926;--meal:#199e70;--log:#c98500;--fly:#9085e9;--rest:#5a5a56;--route-dim:#6a6a66;--stay:#6aa0d8}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:-apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);font-size:13px}
+#app{display:grid;height:100%;grid-template-rows:auto 1fr auto;grid-template-columns:400px 1fr;grid-template-areas:"top top" "side map" "gantt gantt"}
+#top{grid-area:top;display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+#top h1{font-size:16px;margin:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:var(--card);color:var(--ink2);padding:5px 10px;cursor:pointer;font-size:12.5px}
+.seg button.on{background:var(--ink);color:var(--bg)}
+#days{display:flex;gap:4px;flex-wrap:wrap}
+#days button{border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:14px;padding:3px 9px;cursor:pointer;font-size:12px}
+#days button.on{background:var(--stay);border-color:var(--stay);color:#fff}
+#side{grid-area:side;overflow:auto;padding:14px 16px;background:var(--panel);border-right:1px solid var(--line);line-height:1.5}
+#side h2{font-size:15px;margin:0 0 2px}
+#side .sub{color:var(--ink2);margin:0 0 10px}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.kpi div{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.kpi b{display:block;font-size:16px}.kpi span{color:var(--ink3);font-size:11px}
+.sched{list-style:none;padding:0;margin:0}
+.sched li{display:grid;grid-template-columns:86px 10px 1fr;gap:8px;padding:6px 4px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:4px}
+.sched li:hover,.sched li.hl{background:var(--card)}
+.sched .t{color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:12px}
+.sched .dot{width:10px;height:10px;border-radius:3px;margin-top:4px}
+.sched .n{color:var(--ink3);font-size:12px}
+.note{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin:10px 0;color:var(--ink2)}
+#map{grid-area:map;min-height:0}
+#gantt{grid-area:gantt;border-top:1px solid var(--line);background:var(--panel);padding:6px 16px 10px;overflow:auto;max-height:42vh}
+#gantt h3{font-size:12.5px;margin:4px 0 6px;color:var(--ink2);font-weight:600;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.lg{display:inline-flex;align-items:center;gap:4px;font-weight:400}.lg i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.grow{display:grid;grid-template-columns:170px 1fr;align-items:center;gap:8px;height:24px;margin:2px 0;cursor:pointer;border-radius:4px}
+.grow:hover{background:var(--card)}.grow.on .lab{color:var(--ink);font-weight:600}
+.grow .lab{font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:4px}
+.grow .bar{position:relative;height:18px;background:var(--card);border-radius:3px}
+.grow.on .bar{outline:2px solid var(--stay);outline-offset:1px}
+.blk{position:absolute;top:0;height:18px;border-radius:3px;border:2px solid var(--bg);border-width:0 1px;overflow:hidden;color:#fff;font-size:10.5px;line-height:18px;padding:0 4px;white-space:nowrap;text-overflow:ellipsis}
+.blk.dirt{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.28) 0 3px,transparent 3px 7px)}
+.blk.hl{outline:2px solid var(--ink);z-index:2}
+.axis{display:grid;grid-template-columns:170px 1fr;gap:8px;margin-bottom:2px}
+.axis .ticks{position:relative;height:14px}
+.axis .ticks span{position:absolute;transform:translateX(-50%);font-size:10px;color:var(--ink3)}
+.grid{position:absolute;inset:0;pointer-events:none}
+.grid i{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+#tip{position:fixed;z-index:9999;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 9px;border-radius:5px;font-size:12px;max-width:280px;display:none;line-height:1.4}
+.num{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--stay);color:#fff;font-size:11px;text-align:center;line-height:20px;font-weight:bold;box-shadow:0 0 0 2px #fff}
+.num.dim{opacity:.45}
+.leaflet-popup-content{margin:10px 12px;font-size:12.5px}
+.legend{background:#fff;color:#222;padding:6px 10px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.3);font-size:12px;line-height:1.7}
+.legtag{background:#fff;border:1px solid var(--drive);color:var(--drive);font-weight:bold;font-size:11px;padding:0 5px;border-radius:4px;white-space:nowrap}
+@media (max-width:860px){#app{grid-template-columns:1fr;grid-template-rows:auto 42vh 1fr auto;grid-template-areas:"top" "map" "side" "gantt"}#side{border-right:0;border-top:1px solid var(--line)}#gantt{max-height:34vh}.grow{grid-template-columns:110px 1fr}.axis{grid-template-columns:110px 1fr}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <h1>美西南自驾 · 12/24 → 1/3</h1>
+    <div class="seg" id="plans"></div>
+    <div id="days"></div>
+    <div class="seg" style="margin-left:auto"><button id="themeBtn" title="切换深色/浅色">◐</button></div>
+  </div>
+  <div id="side"></div>
+  <div id="map"></div>
+  <div id="gantt"></div>
+</div>
+<div id="tip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="trip_routes.js"></script>
+<script>
+/* ===================== 数据：地点 ===================== */
+const POI={
+ phx:{n:"PHX 机场",ll:[33.4373,-112.0078],kind:"air"},
+ tempe:{n:"Tempe",ll:[33.4255,-111.94],kind:"stay"},
+ papago:{n:"Papago Park · Hole-in-the-Rock",ll:[33.4575,-111.9476],img:"papago_park"},
+ scottsdale:{n:"Old Town Scottsdale",ll:[33.4942,-111.9261]},
+ southmtn:{n:"South Mountain Park（Dobbins Lookout）",ll:[33.3432,-112.0657]},
+ tusayan:{n:"Tusayan",ll:[35.9736,-112.1265],kind:"stay"},
+ mather:{n:"Grand Canyon · Mather Point",ll:[36.0617,-112.1077],img:"grand_canyon_mather_point"},
+ hopi:{n:"Hopi Point（Hermit Rd）",ll:[36.0740,-112.1550]},
+ desertview:{n:"Desert View Watchtower",ll:[36.0441,-111.826],img:"desert_view_watchtower"},
+ page:{n:"Page",ll:[36.9147,-111.4558],kind:"stay"},
+ glencanyondam:{n:"Glen Canyon Dam 观景点",ll:[36.9370,-111.4838]},
+ wahweap:{n:"Wahweap Overlook / Lake Powell",ll:[36.9972,-111.4946]},
+ horseshoe:{n:"Horseshoe Bend",ll:[36.8791,-111.5104],img:"horseshoe_bend"},
+ mv:{n:"Monument Valley（The View / Goulding's）",ll:[36.9822,-110.1115],kind:"stay"},
+ mvview:{n:"Monument Valley 观景台 / 17 英里环线",ll:[36.9822,-110.1115],img:"monument_valley"},
+ forrestgump:{n:"Forrest Gump Point（US-163 mile 13）",ll:[37.1014,-109.9907]},
+ toadstool:{n:"Toadstool Hoodoos（Utah）",ll:[37.1032,-111.8763]},
+ fourcorners:{n:"Four Corners Monument",ll:[36.9990,-109.0452],img:"four_corners"},
+ shiprock:{n:"Shiprock 孤峰（远眺）",ll:[36.6872,-108.8368],img:"shiprock"},
+ farmington:{n:"Farmington",ll:[36.7281,-108.2187],kind:"stay"},
+ bisti:{n:"Bisti / De-Na-Zin 停车场",ll:[36.2587,-108.2516],img:"bisti_badlands"},
+ ahshislepah:{n:"Ah-Shi-Sle-Pah 停车场（约）",ll:[36.1517,-107.9620],img:"ah_shi_sle_pah"},
+ valleyofdreams:{n:"Valley of Dreams 停车场（约）",ll:[36.1670,-108.0440],img:"valley_of_dreams"},
+ santafe:{n:"Santa Fe Plaza",ll:[35.6870,-105.9378],img:"santa_fe_plaza",kind:"stay"},
+ bandelier:{n:"Bandelier National Monument（可选）",ll:[35.7789,-106.2708],img:"bandelier"},
+ alamogordo:{n:"Alamogordo",ll:[32.8995,-105.9603],kind:"stay"},
+ whitesands:{n:"White Sands 游客中心",ll:[32.7797,-106.1725],img:"white_sands"},
+ cloudcroft:{n:"Cloudcroft",ll:[32.9576,-105.7425],img:"cloudcroft"},
+ artesia:{n:"Artesia",ll:[32.8423,-104.4036]},
+ carlsbad:{n:"Carlsbad",ll:[32.4207,-104.2288],kind:"stay"},
+ caverns:{n:"Carlsbad Caverns 游客中心",ll:[32.1753,-104.4440],img:"carlsbad_caverns_big_room"},
+ guadalupe:{n:"Guadalupe Mtns · Pine Springs",ll:[31.8911,-104.8220],img:"guadalupe_mountains"},
+ elp:{n:"ELP 机场",ll:[31.8072,-106.3776],kind:"air"},
+ abq:{n:"ABQ 机场",ll:[35.0402,-106.6092],kind:"air"},
+ abqoldtown:{n:"Albuquerque Old Town",ll:[35.0964,-106.6703],kind:"stay"},
+};
+
+/* ===================== 数据：每天时段 =====================
+ type: drive 开车 · dirt 土路 · play 游玩 · meal 用餐 · log 手续/机场/入住 · rest 休整 · fly 航班
+ leg: trip_routes.js 里的路段 id（可多个）；poi: 地点 id */
+const B=(t,type,title,o={})=>Object.assign({t,type,title},o);
+const D=(date,dow,stay,sunset,blocks,note)=>({date,dow,stay,sunset,blocks,note});
+
+const day_phx_arrive=(car)=>D("12/24","四","Tempe","17:24",[
+ B("13:00-14:30","log","PHX 落地 · 取车"+car,{poi:"phx",n:"到达时间按下午假设，按实际航班改"}),
+ B("14:30-15:00","drive","PHX → Tempe",{leg:["phx_tempe"]}),
+ B("15:00-16:15","rest","酒店入住 · 休整",{poi:"tempe"}),
+ B("16:15-17:45","play","Papago Park · Hole-in-the-Rock 看日落",{poi:"papago",n:"日落 17:24，停车免费"}),
+ B("18:00-19:30","meal","晚餐（Tempe Mill Ave）",{poi:"tempe"})]);
+const day_phx_xmas=D("12/25","五","Tempe","17:25",[
+ B("09:30-11:30","play","South Mountain · Dobbins Lookout（可开车上去）",{poi:"southmtn",n:"圣诞节博物馆、植物园多关门，户外最稳"}),
+ B("12:00-13:30","meal","午餐",{poi:"tempe",n:"提前查圣诞节营业的餐厅"}),
+ B("14:00-16:30","play","Old Town Scottsdale 散步",{poi:"scottsdale"}),
+ B("17:00-18:30","meal","圣诞晚餐",{poi:"scottsdale",n:"要订位"})],"圣诞节：缓冲日，倒时差、补给");
+const day_to_gc=(date,dow,extra)=>D(date,dow,"Tusayan","17:19",[
+ B("09:00-12:45","drive","Tempe → I-17 → Flagstaff → AZ-64 → Tusayan",{leg:["tempe_tusayan"],n:"230 mi · 3.5–3.75 h"}),
+ B("12:45-13:30","meal","Tusayan 午餐 · 放行李",{poi:"tusayan"}),
+ B("13:30-13:45","drive","进园 → Mather Point",{leg:["tusayan_mather"]}),
+ B("13:45-15:30","play","Mather Point → Rim Trail → Yavapai Geology Museum",{poi:"mather"}),
+ B("15:30-16:45","play","Hermit Rd：Hopi / Mohave Point（12–2 月可自驾）",{poi:"hopi"}),
+ B("16:45-17:30","play","日落（Hopi Point 或 Mather Point）",{poi:"hopi",n:"日落约 17:19，很冷，带手套"}),
+ B("18:00-19:30","meal","晚餐（Tusayan）",{poi:"tusayan"})],extra);
+const day_gc_to_page=(date,dow)=>D(date,dow,"Page","17:18",[
+ B("09:00-10:30","drive","Tusayan → Desert View Drive（Grandview、Lipan Point 停）",{leg:["tusayan_mather","mather_desertview"]}),
+ B("10:30-11:30","play","Desert View Watchtower",{poi:"desertview"}),
+ B("11:30-14:00","drive","Desert View → Cameron → US-89 → Page",{leg:["desertview_page"],n:"115 mi · 2.4 h；Cameron Trading Post 可停"}),
+ B("14:00-15:00","meal","Page 午餐 · 入住",{poi:"page"}),
+ B("15:00-15:30","play","Glen Canyon Dam 观景点",{poi:"glencanyondam"}),
+ B("15:30-15:45","drive","→ Horseshoe Bend",{leg:["page_horseshoe"]}),
+ B("15:45-17:45","play","Horseshoe Bend（步行 1.5 mi 来回）看日落",{poi:"horseshoe",n:"停车 $10；日落约 17:18；无护栏"}),
+ B("17:45-18:00","drive","回 Page",{leg:["horseshoe_page"]}),
+ B("18:15-19:30","meal","晚餐",{poi:"page"})]);
+const day_mv=D("12/28","一","Monument Valley","17:15",[
+ B("09:00-11:15","drive","Page → AZ-98 → US-160 → Kayenta → US-163 → Monument Valley",{leg:["page_mv"],n:"125 mi · 2.25 h"}),
+ B("11:15-13:15","play","17 英里自驾环线：John Ford's Point、Artist's Point、Totem Pole",{poi:"mvview",n:"冬季环线只开 8:00–14:00，要在 13:00 前进；砾石路普通车可走，雪后泥泞另说；门票 $8/人，国家公园年票无效"}),
+ B("13:15-14:15","meal","The View 餐厅午餐 · 入住",{poi:"mv"}),
+ B("14:30-15:00","drive","→ Forrest Gump Point",{leg:["mv_forrestgump"]}),
+ B("15:00-15:30","play","Forrest Gump Point 标准机位（US-163 路中间拍，注意来车）",{poi:"forrestgump"}),
+ B("15:30-16:00","drive","回 Monument Valley",{leg:["forrestgump_mv"]}),
+ B("16:00-16:30","rest","休整",{poi:"mv"}),
+ B("16:30-17:30","play","观景台 / 房间阳台看日落",{poi:"mvview",n:"日落约 17:15"}),
+ B("18:00-19:30","meal","晚餐（The View 或 Goulding's）",{poi:"mv"})],"圣诞周 The View / Goulding's 常满房，先订");
+const day_page_fly=(date,dow)=>D(date,dow,"Page","17:19",[
+ B("09:00-09:45","drive","Page → US-89 北 → Toadstool Hoodoos 停车场",{leg:["page_toadstool"]}),
+ B("09:45-11:30","play","Toadstool Hoodoos（来回 1.5 mi，平路）",{poi:"toadstool"}),
+ B("11:30-12:15","drive","回 Page",{leg:["toadstool_page"]}),
+ B("12:15-13:15","meal","午餐",{poi:"page"}),
+ B("13:15-15:30","play","Hanging Garden Trail / Wahweap Overlook（Lake Powell）",{poi:"wahweap"}),
+ B("15:30-17:30","rest","休整（可再去 Horseshoe Bend 日落）",{poi:"page"}),
+ B("18:00-19:30","meal","晚餐",{poi:"page"})]);
+const bisti_afternoon=[
+ B("14:00-14:45","drive","Farmington → NM-371 南 → Bisti 停车场",{leg:["farmington_bisti"],n:"36 mi，最后 2 mi 砾石路，普通车可到"}),
+ B("14:45-17:15","play","Bisti Badlands：Cracked Eggs / Wings，看日落",{poi:"bisti",n:"无步道，提前下载 GPS 轨迹；日落 16:58；雨雪后泥路不可走"}),
+ B("17:15-18:00","drive","回 Farmington",{leg:["bisti_farmington"]}),
+ B("18:15-19:30","meal","晚餐 · 入住",{poi:"farmington"})];
+const day_to_farmington_orig=D("12/29","二","Farmington","16:58",[
+ B("07:15-07:50","play","（可选）阳台 / 观景台看日出，Mittens 剪影",{poi:"mvview",n:"日出约 7:30，不想早起就跳过"}),
+ B("09:00-11:00","drive","Monument Valley → Kayenta → US-160 → Four Corners",{leg:["mv_fourcorners"],n:"97 mi · 2 h"}),
+ B("11:00-11:30","play","Four Corners Monument",{poi:"fourcorners",n:"Navajo Parks 管理，元旦前后开放时间先查"}),
+ B("11:30-13:30","drive","Four Corners → US-64 → Shiprock 远眺 → Farmington",{leg:["fourcorners_farmington"],n:"96 mi"}),
+ B("13:30-14:00","meal","Farmington 快午餐",{poi:"farmington"}),
+ ...bisti_afternoon],"天气是一票否决：下雨下雪就不去 Bisti，改 Farmington 休整");
+const day_to_farmington_fly=D("12/29","二","Farmington","16:58",[
+ B("09:00-12:15","drive","Albuquerque → US-550（Cuba、Nageezi）→ Farmington",{leg:["oldtown_farmington"],n:"184 mi · 3 h"}),
+ B("12:15-13:00","meal","Farmington 午餐 · 放行李",{poi:"farmington"}),
+ B("13:00-14:00","rest","休整",{poi:"farmington"}),
+ ...bisti_afternoon],"天气是一票否决：下雨下雪就不去 Bisti，改 Farmington 休整");
+const day_badlands=D("12/30","三","Santa Fe","16:56",[
+ B("09:00-11:00","dirt","Farmington → NM-371 → CR 7650 土路 → Ah-Shi-Sle-Pah 停车场",{leg:["farmington_ahshislepah"],n:"65 mi，后半土路；高底盘车"}),
+ B("11:00-12:30","play","Ah-Shi-Sle-Pah · King of Wings（来回 3 mi）",{poi:"ahshislepah"}),
+ B("12:30-13:00","dirt","→ Valley of Dreams 停车场",{leg:["ahshislepah_vod"],n:"Navajo Nation 地界，要 backcountry permit"}),
+ B("13:00-14:15","play","Valley of Dreams（停车场到岩柱区 15 min）",{poi:"valleyofdreams"}),
+ B("14:15-17:30","drive","Valley of Dreams → NM-57 土路 → US-550 → Santa Fe",{leg:["vod_nageezi","nageezi_santafe"],n:"前 1 h 是 NM-57 土路（天黑前走完），到 US-550 后 2.5 h 铺装路"}),
+ B("17:30-18:30","play","Santa Fe Plaza / Canyon Road 圣诞灯饰（天黑正好）",{poi:"santafe"}),
+ B("18:45-20:00","meal","晚餐 · 入住",{poi:"santafe"})],"三个荒野点优先级 Bisti > Valley of Dreams > Ah-Shi-Sle-Pah；路况差就砍后者");
+const day_to_alamogordo=D("12/31","四","Alamogordo","17:03",[
+ B("09:00-10:30","play","Santa Fe 老城：Plaza、Loretto Chapel、San Miguel",{poi:"santafe",n:"可选：改去 Bandelier（往返多 1.5 h，White Sands 就赶不上日落）"}),
+ B("10:30-14:00","drive","Santa Fe → I-25 → US-380 → US-54 → Alamogordo",{leg:["santafe_alamogordo"],n:"217 mi · 3.5 h"}),
+ B("14:00-14:45","meal","Alamogordo 午餐 · 入住",{poi:"alamogordo"}),
+ B("14:45-15:05","drive","→ White Sands",{leg:["alamogordo_whitesands"]}),
+ B("15:05-17:45","play","White Sands：Dune Life / Alkali Flat 短段，日落",{poi:"whitesands",n:"日落 17:03，日落后约 1 h 关门；前一天查 nps.gov/whsa 有无导弹试验封路"}),
+ B("17:45-18:05","drive","回 Alamogordo",{leg:["whitesands_alamogordo"]}),
+ B("18:30-20:00","meal","跨年晚餐",{poi:"alamogordo"})]);
+const day_to_carlsbad=D("1/1","五","Carlsbad","17:10",[
+ B("09:00-09:35","drive","Alamogordo → US-82 上山 → Cloudcroft",{leg:["alamogordo_cloudcroft"],n:"雪天改 US-70 经 Roswell（205 mi · 3.5 h）"}),
+ B("09:35-10:30","play","Cloudcroft 山顶小镇（海拔 2,600 m）",{poi:"cloudcroft"}),
+ B("10:30-12:30","drive","Cloudcroft → US-82 → Artesia",{leg:["cloudcroft_artesia"]}),
+ B("12:30-13:15","meal","Artesia 午餐",{poi:"artesia"}),
+ B("13:15-14:00","drive","Artesia → US-285 → Carlsbad",{leg:["artesia_carlsbad"]}),
+ B("14:00-15:00","log","入住 · 休整",{poi:"carlsbad"}),
+ B("15:00-17:00","play","Living Desert Zoo & Gardens / Pecos 河畔散步",{poi:"carlsbad",n:"元旦可能关门，先查"}),
+ B("18:00-19:30","meal","晚餐",{poi:"carlsbad"})],"Carlsbad Caverns 元旦闭园，所以今天不进洞");
+const day_caverns=D("1/2","六","Carlsbad","17:11",[
+ B("09:00-09:45","drive","Carlsbad → US-62/180 → NM-7 → 洞穴游客中心",{leg:["carlsbad_caverns"]}),
+ B("09:45-10:15","log","Timed entry 核验 · 买门票 $15",{poi:"caverns",n:"冬季入洞 8:30–15:30；自然入口最晚 14:30"}),
+ B("10:15-13:15","play","Natural Entrance 走下去 → Big Room 一圈（约 3 h）",{poi:"caverns"}),
+ B("13:15-14:00","meal","游客中心午餐",{poi:"caverns"}),
+ B("14:00-14:45","drive","回 Carlsbad",{leg:["caverns_carlsbad"]}),
+ B("15:00-17:00","rest","休整（可选 Sitting Bull Falls 往返 2 h）",{poi:"carlsbad"}),
+ B("18:00-19:30","meal","晚餐",{poi:"carlsbad"})]);
+const day_to_elp=(car)=>D("1/3","日","— 飞离 ELP","17:12",[
+ B("09:00-10:00","drive","Carlsbad → US-62/180 → Guadalupe Mtns Pine Springs",{leg:["carlsbad_guadalupe"]}),
+ B("10:00-11:30","play","Pine Springs 游客中心 · Pinery Trail / Devil's Hall 短段",{poi:"guadalupe"}),
+ B("11:30-13:30","drive","Guadalupe → US-62/180 → ELP",{leg:["guadalupe_elp"],n:"104 mi · 2 h"}),
+ B("13:30-14:00","log","ELP 还车"+car,{poi:"elp"}),
+ B("14:00-15:00","log","机场（回程航班按 16:00 以后假设）",{poi:"elp"})]);
+
+const PLANS={
+ orig:{name:"原方案：一辆车 PHX → ELP（含 Monument Valley）",days:[
+   day_phx_arrive(""),day_phx_xmas,day_to_gc("12/26","六"),day_gc_to_page("12/27","日"),day_mv,
+   day_to_farmington_orig,day_badlands,day_to_alamogordo,day_to_carlsbad,day_caverns,day_to_elp("")]},
+ fly:{name:"飞 ABQ 方案：PHX 往返 + ✈ + ABQ → ELP",days:[
+   day_phx_arrive(" ①"),day_to_gc("12/25","五","圣诞节：大峡谷正常开，Tusayan 餐厅要订"),day_gc_to_page("12/26","六"),day_page_fly("12/27","日"),
+   D("12/28","一","Albuquerque Old Town","17:00",[
+     B("09:00-13:30","drive","Page → US-89 → Flagstaff → I-17 → PHX",{leg:["page_phx"],n:"282 mi · 4.5 h"}),
+     B("13:30-14:00","log","PHX 还车 ①",{poi:"phx"}),
+     B("14:00-16:30","log","安检 · 午餐 · 候机",{poi:"phx",n:"航班时间按 16:30 假设，查 Southwest / American 下午班"}),
+     B("16:30-17:50","fly","✈ PHX → ABQ（1 h 20）",{fly:["phx","abq"]}),
+     B("17:50-18:30","log","ABQ 取车 ②",{poi:"abq"}),
+     B("18:30-18:50","drive","ABQ → Old Town",{leg:["abq_oldtown"]}),
+     B("19:00-20:30","meal","Old Town 晚餐 · 入住",{poi:"abqoldtown"})],"全程最累的一天：开车 4.5 h + 还车 + 飞行 + 取车"),
+   day_to_farmington_fly,day_badlands,day_to_alamogordo,day_to_carlsbad,day_caverns,day_to_elp(" ②")]}
+};
+const DIRT=new Set(["farmington_ahshislepah","ahshislepah_vod","vod_nageezi"]); // 土路路段（地图上画虚线）
+const TYPE={drive:["开车","--drive"],dirt:["土路","--drive"],play:["游玩","--play"],meal:["用餐","--meal"],log:["手续 / 机场 / 入住","--log"],rest:["休整","--rest"],fly:["航班","--fly"]};
+
+/* ===================== 工具 ===================== */
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const hm=s=>{const [h,m]=s.split(":").map(Number);return h+m/60};
+const span=t=>t.split("-").map(hm);
+const fmtH=h=>{const x=Math.round(h*4)/4;return x%1===0?x+" h":x.toFixed(2).replace(/\.?0+$/,"")+" h"};
+const X0=7,X1=21; // 时间轴 07:00–21:00
+const dayLegs=d=>d.blocks.flatMap(b=>b.leg||[]);
+const dayMi=d=>dayLegs(d).reduce((s,l)=>s+(ROUTES[l]?ROUTES[l].mi:0),0);
+const dayDriveH=d=>d.blocks.filter(b=>b.type==="drive"||b.type==="dirt").reduce((s,b)=>{const [a,z]=span(b.t);return s+z-a},0);
+
+/* ===================== 状态 ===================== */
+const q=new URLSearchParams(location.search);
+let plan=q.get("plan")in PLANS?q.get("plan"):"orig";
+let dayIdx=q.has("day")?Number(q.get("day")):-1;   // -1 = 全程
+const tip=document.getElementById("tip");
+function showTip(e,html){tip.innerHTML=html;tip.style.display="block";moveTip(e)}
+function moveTip(e){const w=tip.offsetWidth,h=tip.offsetHeight;tip.style.left=Math.min(e.clientX+14,innerWidth-w-8)+"px";tip.style.top=Math.min(e.clientY+14,innerHeight-h-8)+"px"}
+function hideTip(){tip.style.display="none"}
+
+/* ===================== 地图 ===================== */
+const map=L.map("map",{zoomControl:true}).setView([34.6,-108.5],6);
+const attribOSM='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const esri=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri &mdash; Esri, USGS, NOAA, "+attribOSM});
+const esriStreet=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri &mdash; Esri, HERE, Garmin, "+attribOSM});
+const esriSat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri &mdash; Esri, Maxar, Earthstar Geographics"});
+const topo=L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{subdomains:"abc",maxZoom:17,attribution:attribOSM+", SRTM | &copy; OpenTopoMap (CC-BY-SA)"});
+esri.addTo(map);let esriErr=0;esri.on("tileerror",()=>{if(++esriErr>=4&&map.hasLayer(esri)){map.removeLayer(esri);topo.addTo(map)}});
+L.control.layers({"Esri 地形":esri,"Esri 街道":esriStreet,"卫星图":esriSat,"OpenTopoMap":topo},null,{position:"topright"}).addTo(map);
+const routeLayer=L.layerGroup().addTo(map), poiLayer=L.layerGroup().addTo(map), hlLayer=L.layerGroup().addTo(map);
+const legend=L.control({position:"bottomleft"});
+legend.onAdd=()=>{const d=L.DomUtil.create("div","legend");d.innerHTML=`<span style="color:${css("--drive")}">━</span> 当天路线（真实道路，OSRM）&nbsp; <span style="color:${css("--drive")}">┅</span> 土路 &nbsp; <span style="color:${css("--fly")}">┅</span> 航班<br><span style="color:${css("--route-dim")}">━</span> 其他天 &nbsp; <span class="num" style="width:16px;height:16px;line-height:16px;font-size:10px;box-shadow:none">1</span> 住宿 &nbsp; <span style="color:#2e7d32">●</span> 景点（点开有图）`;return d};
+legend.addTo(map);
+
+function arc(a,b){const r=[];for(let i=0;i<=40;i++){const t=i/40;r.push([a[0]+(b[0]-a[0])*t+Math.sin(Math.PI*t)*1.0,a[1]+(b[1]-a[1])*t])}return r}
+function legLine(id,opts){const r=ROUTES[id];if(!r)return null;return L.polyline(r.c,opts)}
+
+function draw(){
+  routeLayer.clearLayers();poiLayer.clearLayers();hlLayer.clearLayers();
+  const P=PLANS[plan];const dimC=css("--route-dim"),drC=css("--drive"),flC=css("--fly");
+  const bounds=[];
+  // 其他天：灰色细线；当天：彩色粗线
+  P.days.forEach((d,i)=>{
+    const on=dayIdx===-1||dayIdx===i;
+    d.blocks.forEach(b=>{
+      (b.leg||[]).forEach(id=>{
+        const pl=legLine(id,on?{color:drC,weight:5,opacity:.9,dashArray:DIRT.has(id)?"6 8":null}:{color:dimC,weight:2.5,opacity:.6});
+        if(!pl)return;pl.addTo(routeLayer);if(on)bounds.push(...pl.getLatLngs());
+        const r=ROUTES[id];
+        pl.bindTooltip(`<b>${b.title}</b><br>${d.date} ${b.t}<br>${r.mi} mi · OSRM 估 ${fmtH(r.h)}（偏保守）`,{sticky:true});
+        pl.on("mouseover",()=>pl.setStyle({weight:on?8:5}));pl.on("mouseout",()=>pl.setStyle({weight:on?5:2.5}));
+      });
+      if(b.fly){const a=arc(POI[b.fly[0]].ll,POI[b.fly[1]].ll);const pl=L.polyline(a,{color:on?flC:dimC,weight:on?3:2,dashArray:"8 7",opacity:.9}).addTo(routeLayer);pl.bindTooltip(`<b>${b.title}</b><br>${d.date} ${b.t}`,{sticky:true});if(on)bounds.push(...a)}
+    });
+  });
+  // 住宿点编号
+  const stays=[];P.days.forEach((d,i)=>{const prev=stays[stays.length-1];if(!d.stay.startsWith("—")&&(!prev||prev.stay!==d.stay))stays.push({stay:d.stay,i,ds:[i]});else if(prev&&prev.stay===d.stay)prev.ds.push(i)});
+  const stayPoi=s=>Object.values(POI).find(p=>p.kind==="stay"&&(s.startsWith(p.n)||p.n.startsWith(s.split(" ")[0])));
+  stays.forEach((s,k)=>{const p=stayPoi(s.stay);if(!p)return;const on=dayIdx===-1||s.ds.includes(dayIdx);
+    L.marker(p.ll,{icon:L.divIcon({className:"",html:`<span class="num ${on?"":"dim"}">${k+1}</span>`,iconSize:[20,20],iconAnchor:[10,10]}),zIndexOffset:500})
+     .addTo(poiLayer).bindPopup(`<b>${k+1} · ${s.stay}</b><br>${s.ds.map(i=>P.days[i].date).join("、")}（${s.ds.length} 晚）`);
+    if(on)bounds.push(p.ll)});
+  // 景点
+  const seen=new Set();
+  P.days.forEach((d,i)=>{const on=dayIdx===-1||dayIdx===i;d.blocks.forEach(b=>{if(!b.poi||seen.has(b.poi+on))return;const p=POI[b.poi];if(p.kind)return;seen.add(b.poi+on);
+    const m=L.circleMarker(p.ll,{radius:on?7:5,color:"#fff",weight:1.5,fillColor:on?"#2e7d32":"#8a8984",fillOpacity:.95}).addTo(poiLayer);
+    const img=p.img?`<a href="images/${p.img}.jpg" target="_blank"><img src="images/thumbs/${p.img}.jpg" style="width:260px;display:block;margin-top:6px;border-radius:4px" alt=""></a>`:"";
+    const when=P.days.flatMap((dd,j)=>dd.blocks.filter(x=>x.poi===b.poi&&x.type==="play").map(x=>`${dd.date} ${x.t}`)).join("<br>");
+    m.bindPopup(`<div style="width:260px"><b>${p.n}</b><br><span style="color:#777">${when}</span>${img}</div>`,{maxWidth:300});
+    if(on)bounds.push(p.ll)})});
+  if(bounds.length)map.fitBounds(L.latLngBounds(bounds),{padding:[40,40],maxZoom:11});
+}
+function highlight(b,on){
+  hlLayer.clearLayers();if(!on||!b)return;
+  (b.leg||[]).forEach(id=>{const pl=legLine(id,{color:css("--ink"),weight:9,opacity:.35});if(pl)pl.addTo(hlLayer)});
+  if(b.poi){const p=POI[b.poi];L.circleMarker(p.ll,{radius:16,color:css("--ink"),weight:2,fill:false}).addTo(hlLayer)}
+  if(b.fly){L.polyline(arc(POI[b.fly[0]].ll,POI[b.fly[1]].ll),{color:css("--ink"),weight:8,opacity:.3}).addTo(hlLayer)}
+}
+function focusBlock(b){
+  if(b.leg&&b.leg.length){const pts=b.leg.flatMap(id=>ROUTES[id]?ROUTES[id].c:[]);if(pts.length)map.fitBounds(L.latLngBounds(pts),{padding:[40,40]})}
+  else if(b.poi){map.setView(POI[b.poi].ll,Math.max(map.getZoom(),11))}
+  else if(b.fly){map.fitBounds(L.latLngBounds(arc(POI[b.fly[0]].ll,POI[b.fly[1]].ll)),{padding:[40,40]})}
+}
+
+/* ===================== 侧栏 ===================== */
+function renderSide(){
+  const P=PLANS[plan];const el=document.getElementById("side");
+  if(dayIdx===-1){
+    const mi=P.days.reduce((s,d)=>s+dayMi(d),0),h=P.days.reduce((s,d)=>s+dayDriveH(d),0);
+    const nights=P.days.length-1;
+    el.innerHTML=`<h2>${P.name}</h2><p class="sub">2026-12-24 → 2027-01-03 · ${nights} 晚 · 全程 MST 无时差</p>
+    <div class="kpi"><div><b>${Math.round(mi).toLocaleString()} mi</b><span>真实道路里程（OSRM）</span></div><div><b>${fmtH(h)}</b><span>计划开车时间</span></div><div><b>${P.days.filter(d=>d.blocks.some(b=>b.type==="play")).length} 天</b><span>有游玩安排</span></div></div>
+    <div class="note">点上方日期或下方时间轴选某一天：地图只高亮那天的路线和景点，侧栏列出分时段安排。悬停时间块会在地图上定位。</div>
+    <ul class="sched">${P.days.map((d,i)=>`<li data-day="${i}"><span class="t">${d.date} 周${d.dow}</span><span class="dot" style="background:var(--stay)"></span><span><b>${d.stay}</b><br><span class="n">${Math.round(dayMi(d))} mi · 开车 ${fmtH(dayDriveH(d))} · 日落 ${d.sunset}</span></span></li>`).join("")}</ul>`;
+    el.querySelectorAll("li").forEach(li=>li.onclick=()=>select(Number(li.dataset.day)));
+    return;
+  }
+  const d=P.days[dayIdx];
+  el.innerHTML=`<h2>D${dayIdx+1} · ${d.date} 周${d.dow}</h2><p class="sub">住 ${d.stay} · 日落约 ${d.sunset}</p>
+  <div class="kpi"><div><b>${Math.round(dayMi(d))} mi</b><span>真实道路里程</span></div><div><b>${fmtH(dayDriveH(d))}</b><span>计划开车</span></div><div><b>${fmtH(d.blocks.filter(b=>b.type==="play").reduce((s,b)=>{const [a,z]=span(b.t);return s+z-a},0))}</b><span>游玩</span></div></div>
+  ${d.note?`<div class="note">${d.note}</div>`:""}
+  <ul class="sched">${d.blocks.map((b,j)=>`<li data-j="${j}"><span class="t">${b.t.replace("-","–")}</span><span class="dot" style="background:var(${TYPE[b.type][1]})"></span><span>${b.title}${b.n?`<br><span class="n">${b.n}</span>`:""}${b.leg?`<br><span class="n">${b.leg.map(id=>ROUTES[id]?ROUTES[id].mi+" mi":"").join(" + ")}</span>`:""}</span></li>`).join("")}</ul>`;
+  el.querySelectorAll("li").forEach(li=>{const b=d.blocks[li.dataset.j];
+    li.onmouseenter=()=>{highlight(b,true);li.classList.add("hl")};li.onmouseleave=()=>{highlight(null);li.classList.remove("hl")};li.onclick=()=>focusBlock(b)});
+}
+
+/* ===================== 时间轴（甘特） ===================== */
+function renderGantt(){
+  const P=PLANS[plan];const g=document.getElementById("gantt");
+  const pct=h=>((h-X0)/(X1-X0)*100);
+  let html=`<h3>每日分时段 ${Object.entries(TYPE).map(([k,[n,v]])=>`<span class="lg"><i style="background:var(${v});${k==="dirt"?"background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.35) 0 2px,transparent 2px 5px)":""}"></i>${n}</span>`).join("")}</h3>`;
+  html+=`<div class="axis"><span></span><div class="ticks">${Array.from({length:X1-X0+1},(_,i)=>`<span style="left:${pct(X0+i)}%">${X0+i}:00</span>`).join("")}</div></div>`;
+  P.days.forEach((d,i)=>{
+    html+=`<div class="grow ${dayIdx===i?"on":""}" data-day="${i}"><div class="lab">D${i+1} ${d.date} 周${d.dow} · ${d.stay}</div><div class="bar"><div class="grid">${Array.from({length:X1-X0+1},(_,k)=>`<i style="left:${pct(X0+k)}%"></i>`).join("")}</div>`;
+    d.blocks.forEach((b,j)=>{const [a,z]=span(b.t);const l=Math.max(pct(a),0),r=Math.min(pct(z),100);if(r<=l)return;
+      html+=`<div class="blk ${b.type==="dirt"?"dirt":""}" data-day="${i}" data-j="${j}" style="left:${l}%;width:${r-l}%;background:var(${TYPE[b.type][1]})">${b.title}</div>`});
+    html+=`</div></div>`;
+  });
+  g.innerHTML=html;
+  g.querySelectorAll(".grow").forEach(r=>r.onclick=()=>select(Number(r.dataset.day)));
+  g.querySelectorAll(".blk").forEach(el=>{const b=P.days[el.dataset.day].blocks[el.dataset.j];
+    el.onmouseenter=e=>{showTip(e,`<b>${b.title}</b><br>${P.days[el.dataset.day].date} ${b.t.replace("-","–")} · ${TYPE[b.type][0]}${b.n?"<br>"+b.n:""}${b.leg?"<br>"+b.leg.map(id=>ROUTES[id]?ROUTES[id].mi+" mi":"").join(" + "):""}`);el.classList.add("hl");if(dayIdx===-1||dayIdx==el.dataset.day)highlight(b,true)};
+    el.onmousemove=moveTip;el.onmouseleave=()=>{hideTip();el.classList.remove("hl");highlight(null)};
+    el.onclick=e=>{e.stopPropagation();if(dayIdx!=el.dataset.day)select(Number(el.dataset.day));focusBlock(b)}});
+}
+
+/* ===================== 顶栏 / 选择 ===================== */
+function renderTop(){
+  document.getElementById("plans").innerHTML=Object.entries(PLANS).map(([k,p])=>`<button class="${k===plan?"on":""}" data-p="${k}">${p.name}</button>`).join("");
+  document.querySelectorAll("#plans button").forEach(b=>b.onclick=()=>{plan=b.dataset.p;dayIdx=Math.min(dayIdx,PLANS[plan].days.length-1);renderAll()});
+  const P=PLANS[plan];
+  document.getElementById("days").innerHTML=`<button class="${dayIdx===-1?"on":""}" data-d="-1">全程</button>`+P.days.map((d,i)=>`<button class="${dayIdx===i?"on":""}" data-d="${i}">${d.date}</button>`).join("");
+  document.querySelectorAll("#days button").forEach(b=>b.onclick=()=>select(Number(b.dataset.d)));
+}
+function select(i){dayIdx=i;renderAll()}
+function renderAll(){renderTop();renderSide();renderGantt();draw();history.replaceState(null,"",`?plan=${plan}${dayIdx>=0?"&day="+dayIdx:""}`)}
+document.getElementById("themeBtn").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme==="dark"||(!r.dataset.theme&&matchMedia("(prefers-color-scheme:dark)").matches);r.dataset.theme=dark?"light":"dark";renderAll()};
+renderAll();
+</script>
+</body>
+</html>

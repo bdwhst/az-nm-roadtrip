@@ -1,0 +1,6 @@
+# 只发布网页本身；笔记、交接文档和旧版静态图不上传
+*.md
+route_map.html
+route_map_fly.html
+route_map.png
+.DS_Store
