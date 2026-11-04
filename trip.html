@@ -73,6 +73,13 @@ html,body{margin:0;height:100%;font-family:-apple-system,"PingFang SC","Noto San
 .pic{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:var(--pic);height:var(--pic);border-radius:6px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);overflow:hidden;background:#ddd;cursor:pointer;transition:width .25s,height .25s}
 .pic img{width:100%;height:100%;object-fit:cover;display:block}
 .pic.dim{opacity:.55;filter:grayscale(.6)}
+.pic.big{width:300px;height:auto;border-radius:8px;opacity:1;filter:none;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.45);cursor:zoom-out}
+.pic.big img{height:200px}
+.pic.big:hover{transform:translate(-50%,-50%)}
+.pic .cap{display:none}
+.pic.big .cap{display:block;padding:6px 9px 8px;font-size:12px;line-height:1.4;color:#222}
+.pic.big .cap b{font-size:13px}
+.pic.big .cap a{color:#1f4e79}
 .pic:hover{transform:translate(-50%,-50%) scale(1.15);z-index:5;border-color:var(--stay)}
 .leaflet-marker-icon.picwrap{overflow:visible}
 .num{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--stay);color:#fff;font-size:11px;text-align:center;line-height:20px;font-weight:bold;box-shadow:0 0 0 2px #fff}
@@ -392,14 +399,14 @@ const applyPicSize=()=>document.getElementById("map").style.setProperty("--pic",
 applyPicSize();
 map.on("zoomend",()=>{applyPicSize();const w=lineW();routeLayer.eachLayer(l=>{if(l._dayOn)l.setStyle({weight:w})});casingLayer.eachLayer(l=>l.setStyle({weight:w+4}))});
 const legend=L.control({position:"bottomleft"});
-legend.onAdd=()=>{const d=L.DomUtil.create("div","legend");d.innerHTML=`<span style="color:${css("--drive")}">━</span> 当天路线（OSM 路网，OSRM 计算）&nbsp; <span style="color:${css("--drive")}">┅</span> 土路 &nbsp; <span style="color:${css("--fly")}">┅</span> 航班<br><span style="color:${css("--route-dim")}">━</span> 其他天 &nbsp; <span class="num" style="width:16px;height:16px;line-height:16px;font-size:10px;box-shadow:none">1</span> 住宿 &nbsp; <span style="display:inline-block;width:12px;height:12px;border:2px solid #fff;border-radius:3px;background:#b08860;box-shadow:0 0 0 1px #999;vertical-align:-2px"></span> 景点缩略图（随缩放变大，点开看大图）`;return d};
+legend.onAdd=()=>{const d=L.DomUtil.create("div","legend");d.innerHTML=`<span style="color:${css("--drive")}">━</span> 当天路线（OSM 路网，OSRM 计算）&nbsp; <span style="color:${css("--drive")}">┅</span> 土路 &nbsp; <span style="color:${css("--fly")}">┅</span> 航班<br><span style="color:${css("--route-dim")}">━</span> 其他天 &nbsp; <span class="num" style="width:16px;height:16px;line-height:16px;font-size:10px;box-shadow:none">1</span> 住宿 &nbsp; <span style="display:inline-block;width:12px;height:12px;border:2px solid #fff;border-radius:3px;background:#b08860;box-shadow:0 0 0 1px #999;vertical-align:-2px"></span> 景点缩略图（随缩放变大；点一下原地展开，再点收回）`;return d};
 legend.addTo(map);
 
 function arc(a,b){const r=[];for(let i=0;i<=40;i++){const t=i/40;r.push([a[0]+(b[0]-a[0])*t+Math.sin(Math.PI*t)*1.0,a[1]+(b[1]-a[1])*t])}return r}
 function legLine(id,opts){const r=ROUTES[id];if(!r)return null;return L.polyline(r.c,opts)}
 
 function draw(){
-  routeLayer.clearLayers();casingLayer.clearLayers();poiLayer.clearLayers();hlLayer.clearLayers();const W=lineW();
+  bigPic=null;routeLayer.clearLayers();casingLayer.clearLayers();poiLayer.clearLayers();hlLayer.clearLayers();const W=lineW();
   const P=PLANS[plan];const dimC=css("--route-dim"),drC=css("--drive"),flC=css("--fly");
   const bounds=[];
   // 其他天：灰色细线；当天：彩色粗线
@@ -429,16 +436,25 @@ function draw(){
   // 景点
   const seen=new Set();
   P.days.forEach((d,i)=>{const on=dayIdx===-1||dayIdx===i;d.blocks.forEach(b=>{if(!b.poi||seen.has(b.poi+on))return;const p=POI[b.poi];if(p.kind)return;seen.add(b.poi+on);
-    const m=p.img
-      ?L.marker(p.ll,{icon:L.divIcon({className:"picwrap",html:`<div class="pic ${on?"":"dim"}" title="${p.n}"><img src="images/mini/${p.img}.jpg" alt=""></div>`,iconSize:[0,0],iconAnchor:[0,0]}),zIndexOffset:on?300:100}).addTo(poiLayer)
-      :L.circleMarker(p.ll,{radius:on?7:5,color:"#fff",weight:1.5,fillColor:on?"#2e7d32":"#8a8984",fillOpacity:.95}).addTo(poiLayer);
-    const img=p.img?`<a href="images/${p.img}.jpg" target="_blank"><img src="images/thumbs/${p.img}.jpg" style="width:260px;display:block;margin-top:6px;border-radius:4px" alt=""></a>`:"";
     const when=P.days.flatMap((dd,j)=>dd.blocks.filter(x=>x.poi===b.poi&&x.type==="play").map(x=>`${dd.date} ${x.t}`)).join("<br>");
-    m.bindPopup(`<div style="width:260px"><b>${p.n}</b><br><span style="color:#777">${when}</span>${img}</div>`,{maxWidth:300});
+    let m;
+    if(p.img){
+      m=L.marker(p.ll,{icon:L.divIcon({className:"picwrap",html:`<div class="pic ${on?"":"dim"}" title="${p.n}"><img src="images/mini/${p.img}.jpg" alt=""><div class="cap"><b>${p.n}</b><br><span style="color:#777">${when}</span><br><a href="images/${p.img}.jpg" target="_blank">查看原图 ↗</a></div></div>`,iconSize:[0,0],iconAnchor:[0,0]}),zIndexOffset:on?300:100}).addTo(poiLayer);
+      m.on("click",e=>{L.DomEvent.stop(e);const el=m.getElement().querySelector(".pic");
+        if(bigPic&&bigPic.el===el){collapsePic();return}
+        collapsePic();el.classList.add("big");el.querySelector("img").src=`images/thumbs/${p.img}.jpg`;m.setZIndexOffset(2000);
+        bigPic={el,m,img:p.img,z:on?300:100}});
+    }else{
+      m=L.circleMarker(p.ll,{radius:on?7:5,color:"#fff",weight:1.5,fillColor:on?"#2e7d32":"#8a8984",fillOpacity:.95}).addTo(poiLayer);
+      m.bindPopup(`<b>${p.n}</b><br><span style="color:#777">${when}</span>`);
+    }
     if(on)bounds.push(p.ll)})});
   map.invalidateSize({animate:false});   // 侧栏/时间轴渲染后容器高度会变，先重新量尺寸再缩放
   if(bounds.length)map.fitBounds(L.latLngBounds(bounds),{padding:[40,40],maxZoom:11});
 }
+let bigPic=null;   // 当前展开的景点图，同一时间只有一张
+function collapsePic(){if(!bigPic)return;const {el,m,img,z}=bigPic;el.classList.remove("big");el.querySelector("img").src=`images/mini/${img}.jpg`;m.setZIndexOffset(z);bigPic=null}
+map.on("click",collapsePic);
 function highlight(b,on){
   hlLayer.clearLayers();if(!on||!b)return;
   (b.leg||[]).forEach(id=>{const pl=legLine(id,{color:css("--ink"),weight:9,opacity:.35});if(pl)pl.addTo(hlLayer)});
