@@ -132,6 +132,10 @@ const POI={
  cloudcroft:{n:"Cloudcroft",ll:[32.9576,-105.7425],img:"cloudcroft"},
  artesia:{n:"Artesia",ll:[32.8423,-104.4036]},
  cameron:{n:"Cameron Trading Post",ll:[35.8747,-111.4132]},
+ sedona:{n:"Sedona",ll:[34.8697,-111.7610],kind:"stay"},
+ boynton:{n:"Boynton Canyon 步道口 → Subway Cave",ll:[34.9075,-111.8484],img:"boynton_canyon"},
+ airportmesa:{n:"Airport Mesa 观景点",ll:[34.8557,-111.7823]},
+ whitepocket:{n:"White Pocket（Vermilion Cliffs）",ll:[36.9560,-111.9000],img:"white_pocket"},
  socorro:{n:"Socorro",ll:[34.0584,-106.8914]},
  carlsbad:{n:"Carlsbad",ll:[32.4207,-104.2288],kind:"stay"},
  caverns:{n:"Carlsbad Caverns 游客中心",ll:[32.1753,-104.4440],img:"carlsbad_caverns_big_room"},
@@ -253,11 +257,43 @@ const day_to_elp=(car)=>D("1/3","日","— 飞离 ELP","17:12",[
  B("14:30-15:00","log","ELP 还车"+car,{poi:"elp"}),
  B("15:00-16:00","log","机场（回程航班按 17:00 以后假设）",{poi:"elp"})]);
 
+/* ---- 变体 A：Subway Cave（12/25 住 Sedona，12/26 早起爬完再去大峡谷） ---- */
+const day_to_sedona=D("12/25","五","Sedona","17:25",[
+ B("10:00-12:15","drive","Tempe → I-17 → AZ-179 → Sedona",{leg:["tempe_sedona"],n:"124 mi · 2.25 h"}),
+ B("12:15-13:30","meal","Sedona 午餐 · 入住",{poi:"sedona",n:"圣诞节餐厅要订位"}),
+ B("13:30-16:30","play","Chapel of the Holy Cross、Tlaquepaque 圣诞灯饰、Bell Rock 短步道",{poi:"sedona",n:"圣诞节商店多关门，户外都开"}),
+ B("16:30-17:45","play","Airport Mesa 看日落",{poi:"airportmesa",n:"日落 17:25，停车 $3"}),
+ B("18:00-19:30","meal","圣诞晚餐",{poi:"sedona"})],"圣诞节住 Sedona，第二天一早爬 Subway Cave");
+const day_subway=D("12/26","六","Tusayan","17:19",[
+ B("07:40-08:00","drive","Sedona → Boynton Canyon 步道口",{leg:["sedona_boynton"],n:"这天破例早起：步道口只有 35 个车位，9 点前就满；Red Rock Pass $5 现场刷卡"}),
+ B("08:00-11:30","play","Boynton Canyon → Subway Cave（来回 5 mi，爬升 600 ft，最后一段手脚并用爬岩）",{poi:"boynton",n:"2.5–3.5 h；洞口在步道约 2 mi 处右侧无标识岔路"}),
+ B("11:30-14:00","drive","Boynton → AZ-89A Oak Creek Canyon → Flagstaff → AZ-64 → Tusayan",{leg:["boynton_tusayan"],n:"115 mi · 2.5 h；Flagstaff 买午餐带着"}),
+ B("14:00-14:30","meal","Tusayan 放行李 · 快午餐",{poi:"tusayan"}),
+ B("14:30-14:45","drive","进园 → Mather Point",{leg:["tusayan_mather"]}),
+ B("14:45-15:45","play","Mather Point → Rim Trail → Yavapai Point",{poi:"mather"}),
+ B("15:45-16:45","play","Hermit Rd：Hopi / Mohave Point（12–2 月可自驾）",{poi:"hopi"}),
+ B("16:45-17:30","play","日落（Hopi Point 或 Mather Point）",{poi:"hopi",n:"日落约 17:19"}),
+ B("18:00-19:30","meal","晚餐（Tusayan）",{poi:"tusayan"})]);
+/* ---- 变体 B：White Pocket（砍掉圣诞缓冲日，Page 住两晚，12/27 导游团） ---- */
+const day_whitepocket=D("12/27","日","Page","17:18",[
+ B("07:30-08:00","log","导游团 Page 集合（Jeep 接送）",{poi:"page",n:"出发时间由运营商定，一般 7–8 点；这天做不到 10 点出发"}),
+ B("08:00-10:40","dirt","Page → US-89 → House Rock Valley Rd → BLM 1017/1087 深沙路 → White Pocket（团车）",{leg:["page_whitepocket"],n:"约 72 mi · 2 h 40（地图最后一段沙路为示意直线）；租的车别自己开：深沙必须真 4WD，雨雪后泥路封死；路况电话 BLM Kanab (435) 644-1200"}),
+ B("10:40-13:40","play","White Pocket 徒步摄影（脑纹岩、白色漩涡）",{poi:"whitepocket",n:"不需要许可证（和 The Wave 不同）；午餐团里带"}),
+ B("13:40-16:20","dirt","原路返回 Page（团车）",{leg:["whitepocket_page"]}),
+ B("16:20-17:45","play","Wahweap Overlook 看日落 / 休整",{poi:"wahweap"}),
+ B("18:00-19:30","meal","晚餐",{poi:"page"})],"导游团从 Page 或 Kanab 出发，7–8 h，每人约 $200–300，圣诞周提前订；天气差团会取消");
+
 const PLANS={
- orig:{name:"原方案：一辆车 PHX → ELP（含 Monument Valley）",days:[
+ orig:{name:"现方案",days:[
    day_phx_arrive(""),day_phx_xmas,day_to_gc("12/26","六"),day_gc_to_page("12/27","日"),day_mv,
    day_to_farmington_orig,day_badlands,day_to_alamogordo,day_to_carlsbad,day_caverns,day_to_elp("")]},
- fly:{name:"飞 ABQ 方案：PHX 往返 + ✈ + ABQ → ELP",days:[
+ sedona:{name:"A：+ Subway Cave（Sedona）",days:[
+   day_phx_arrive(""),day_to_sedona,day_subway,day_gc_to_page("12/27","日"),day_mv,
+   day_to_farmington_orig,day_badlands,day_to_alamogordo,day_to_carlsbad,day_caverns,day_to_elp("")]},
+ whitepocket:{name:"B：+ White Pocket（Page 两晚）",days:[
+   day_phx_arrive(""),day_to_gc("12/25","五","圣诞节：大峡谷正常开，Tusayan 餐厅要订"),day_gc_to_page("12/26","六"),day_whitepocket,day_mv,
+   day_to_farmington_orig,day_badlands,day_to_alamogordo,day_to_carlsbad,day_caverns,day_to_elp("")]},
+ fly:{name:"飞 ABQ 方案",days:[
    day_phx_arrive(" ①"),day_to_gc("12/25","五","圣诞节：大峡谷正常开，Tusayan 餐厅要订"),day_gc_to_page("12/26","六"),day_page_fly("12/27","日"),
    D("12/28","一","Albuquerque Old Town","17:00",[
      B("09:00-13:30","drive","Page → US-89 → Flagstaff → I-17 → PHX",{leg:["page_phx"],n:"282 mi · 4.5 h"}),
@@ -269,7 +305,7 @@ const PLANS={
      B("19:00-20:30","meal","Old Town 晚餐 · 入住",{poi:"abqoldtown"})],"全程最累的一天：开车 4.5 h + 还车 + 飞行 + 取车"),
    day_to_farmington_fly,day_badlands,day_to_alamogordo,day_to_carlsbad,day_caverns,day_to_elp(" ②")]}
 };
-const DIRT=new Set(["farmington_ahshislepah","ahshislepah_vod","vod_nageezi"]); // 土路路段（地图上画虚线）
+const DIRT=new Set(["farmington_ahshislepah","ahshislepah_vod","vod_nageezi","page_whitepocket","whitepocket_page"]); // 土路路段（地图上画虚线）
 const TYPE={drive:["开车","--drive"],dirt:["土路","--drive"],play:["游玩","--play"],meal:["用餐","--meal"],log:["手续 / 机场 / 入住","--log"],rest:["休整","--rest"],fly:["航班","--fly"]};
 
 /* ===================== 数据：费用（null = 待查） =====================
