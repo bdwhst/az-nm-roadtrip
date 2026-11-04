@@ -329,6 +329,7 @@ function hideTip(){tip.style.display="none"}
 
 /* ===================== 地图 ===================== */
 const map=L.map("map",{zoomControl:true}).setView([34.6,-108.5],6);
+new ResizeObserver(()=>map.invalidateSize({animate:false})).observe(document.getElementById("map"));
 const attribOSM='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const esri=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri &mdash; Esri, USGS, NOAA, "+attribOSM});
 const esriStreet=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri &mdash; Esri, HERE, Garmin, "+attribOSM});
@@ -388,6 +389,7 @@ function draw(){
     const when=P.days.flatMap((dd,j)=>dd.blocks.filter(x=>x.poi===b.poi&&x.type==="play").map(x=>`${dd.date} ${x.t}`)).join("<br>");
     m.bindPopup(`<div style="width:260px"><b>${p.n}</b><br><span style="color:#777">${when}</span>${img}</div>`,{maxWidth:300});
     if(on)bounds.push(p.ll)})});
+  map.invalidateSize({animate:false});   // 侧栏/时间轴渲染后容器高度会变，先重新量尺寸再缩放
   if(bounds.length)map.fitBounds(L.latLngBounds(bounds),{padding:[40,40],maxZoom:11});
 }
 function highlight(b,on){
@@ -397,6 +399,7 @@ function highlight(b,on){
   if(b.fly){L.polyline(arc(POI[b.fly[0]].ll,POI[b.fly[1]].ll),{color:css("--ink"),weight:8,opacity:.3}).addTo(hlLayer)}
 }
 function focusBlock(b){
+  map.invalidateSize({animate:false});
   if(b.leg&&b.leg.length){const pts=b.leg.flatMap(id=>ROUTES[id]?ROUTES[id].c:[]);if(pts.length)map.fitBounds(L.latLngBounds(pts),{padding:[40,40]})}
   else if(b.poi){map.setView(POI[b.poi].ll,Math.max(map.getZoom(),11))}
   else if(b.fly){map.fitBounds(L.latLngBounds(arc(POI[b.fly[0]].ll,POI[b.fly[1]].ll)),{padding:[40,40]})}
