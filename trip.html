@@ -361,15 +361,16 @@ function draw(){
     const on=dayIdx===-1||dayIdx===i; if(on!==pass)return;   // 第一轮画其他天的灰线，第二轮画当天
     d.blocks.forEach(b=>{
       (b.leg||[]).forEach(id=>{
-        const pl=legLine(id,on?{color:drC,weight:W,opacity:1,dashArray:DIRT.has(id)?"6 10":null,lineCap:"round",lineJoin:"round"}:{color:dimC,weight:2.5,opacity:.6});
+        const pl=legLine(id,on?{color:drC,weight:W,opacity:1,dashArray:DIRT.has(id)?"6 10":null,lineCap:"round",lineJoin:"round"}:{color:dimC,weight:4,opacity:.55});
         if(!pl)return;pl._dayOn=on;
+        pl.on("click",e=>{L.DomEvent.stop(e);if(dayIdx!==i)select(i);else focusBlock(b)});
         if(on){legLine(id,{color:"#fff",weight:W+4,opacity:.9,lineCap:"round",lineJoin:"round",interactive:false}).addTo(casingLayer);bounds.push(...pl.getLatLngs())}
         pl.addTo(routeLayer);  // 描边先画、彩色线后画，保证线在描边之上
         const r=ROUTES[id];
-        pl.bindTooltip(`<b>${b.title}</b><br>${d.date} ${b.t}<br>${r.mi} mi · OSRM 估 ${fmtH(r.h)}（偏保守）`,{sticky:true});
-        pl.on("mouseover",()=>pl.setStyle({weight:on?lineW()+3:5}));pl.on("mouseout",()=>pl.setStyle({weight:on?lineW():2.5}));
+        pl.bindTooltip(`<b>${b.title}</b><br>D${i+1} ${d.date} ${b.t}<br>${r.mi} mi · OSRM 估 ${fmtH(r.h)}（偏保守）<br><span style="color:#888">${dayIdx===i?"点击：聚焦这段":"点击：切换到这天"}</span>`,{sticky:true});
+        pl.on("mouseover",()=>pl.setStyle({weight:on?lineW()+3:6,opacity:1}));pl.on("mouseout",()=>pl.setStyle({weight:on?lineW():4,opacity:on?1:.55}));
       });
-      if(b.fly){const a=arc(POI[b.fly[0]].ll,POI[b.fly[1]].ll);const pl=L.polyline(a,{color:on?flC:dimC,weight:on?3:2,dashArray:"8 7",opacity:.9}).addTo(routeLayer);pl.bindTooltip(`<b>${b.title}</b><br>${d.date} ${b.t}`,{sticky:true});if(on)bounds.push(...a)}
+      if(b.fly){const a=arc(POI[b.fly[0]].ll,POI[b.fly[1]].ll);const pl=L.polyline(a,{color:on?flC:dimC,weight:on?3:3,dashArray:"8 7",opacity:.9}).addTo(routeLayer);pl.bindTooltip(`<b>${b.title}</b><br>D${i+1} ${d.date} ${b.t}<br><span style="color:#888">${dayIdx===i?"点击：聚焦":"点击：切换到这天"}</span>`,{sticky:true});pl.on("click",e=>{L.DomEvent.stop(e);if(dayIdx!==i)select(i);else focusBlock(b)});if(on)bounds.push(...a)}
     });
   }));
   // 住宿点编号
@@ -409,7 +410,7 @@ function renderSide(){
     const nights=P.days.length-1;
     el.innerHTML=`<h2>${P.name}</h2><p class="sub">2026-12-24 → 2027-01-03 · ${nights} 晚 · 全程 MST 无时差</p>
     <div class="kpi"><div><b>${Math.round(mi).toLocaleString()} mi</b><span>真实道路里程（OSRM）</span></div><div><b>${fmtH(h)}</b><span>计划开车时间</span></div><div><b>${P.days.filter(d=>d.blocks.some(b=>b.type==="play")).length} 天</b><span>有游玩安排</span></div></div>
-    <div class="note">点上方日期或下方时间轴选某一天：地图只高亮那天的路线和景点，侧栏列出分时段安排。悬停时间块会在地图上定位。</div>
+    <div class="note">点上方日期、下方时间轴，或<b>直接点地图上的任一段路线</b>，都能切到那一天：地图只高亮那天的路线和景点，侧栏列出分时段安排。悬停时间块会在地图上定位。</div>
     <ul class="sched">${P.days.map((d,i)=>`<li data-day="${i}"><span class="t">${d.date} 周${d.dow}</span><span class="dot" style="background:var(--stay)"></span><span><b>${d.stay}</b><br><span class="n">${Math.round(dayMi(d))} mi · 开车 ${fmtH(dayDriveH(d))} · 日落 ${d.sunset}</span></span></li>`).join("")}</ul>`;
     el.querySelectorAll("li").forEach(li=>li.onclick=()=>select(Number(li.dataset.day)));
     return;
