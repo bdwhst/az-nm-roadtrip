@@ -334,18 +334,26 @@ const esri=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Wor
 const esriStreet=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri &mdash; Esri, HERE, Garmin, "+attribOSM});
 const esriSat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri &mdash; Esri, Maxar, Earthstar Geographics"});
 const topo=L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{subdomains:"abc",maxZoom:17,attribution:attribOSM+", SRTM | &copy; OpenTopoMap (CC-BY-SA)"});
-esri.addTo(map);let esriErr=0;esri.on("tileerror",()=>{if(++esriErr>=4&&map.hasLayer(esri)){map.removeLayer(esri);topo.addTo(map)}});
-L.control.layers({"Esri 地形":esri,"Esri 街道":esriStreet,"卫星图":esriSat,"OpenTopoMap":topo},null,{position:"topright"}).addTo(map);
-const routeLayer=L.layerGroup().addTo(map), poiLayer=L.layerGroup().addTo(map), hlLayer=L.layerGroup().addTo(map);
+const osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:attribOSM});
+// 路线几何来自 OSRM（OpenStreetMap 路网），用 OSM 底图才能和道路完全贴合；Esri 底图是另一套数据，放大后会偏几十米。
+// OSM 瓦片对本地 file:// 打开（无 Referer）返回 403，所以本地默认 Esri，线上默认 OSM。
+const LOCAL=location.protocol==="file:";
+(LOCAL?esri:osm).addTo(map);
+let esriErr=0;esri.on("tileerror",()=>{if(++esriErr>=4&&map.hasLayer(esri)){map.removeLayer(esri);topo.addTo(map)}});
+let osmErr=0;osm.on("tileerror",()=>{if(++osmErr>=4&&map.hasLayer(osm)){map.removeLayer(osm);esri.addTo(map)}});
+L.control.layers({"OpenStreetMap（与路线同源，放大最准）":osm,"Esri 地形":esri,"Esri 街道":esriStreet,"卫星图":esriSat,"OpenTopoMap":topo},null,{position:"topright"}).addTo(map);
+const casingLayer=L.layerGroup().addTo(map), routeLayer=L.layerGroup().addTo(map), poiLayer=L.layerGroup().addTo(map), hlLayer=L.layerGroup().addTo(map);
+const lineW=()=>map.getZoom()>=13?8:map.getZoom()>=10?6:5;   // 当天路线线宽随缩放加粗
+map.on("zoomend",()=>{const w=lineW();routeLayer.eachLayer(l=>{if(l._on)l.setStyle({weight:w})});casingLayer.eachLayer(l=>l.setStyle({weight:w+4}))});
 const legend=L.control({position:"bottomleft"});
-legend.onAdd=()=>{const d=L.DomUtil.create("div","legend");d.innerHTML=`<span style="color:${css("--drive")}">━</span> 当天路线（真实道路，OSRM）&nbsp; <span style="color:${css("--drive")}">┅</span> 土路 &nbsp; <span style="color:${css("--fly")}">┅</span> 航班<br><span style="color:${css("--route-dim")}">━</span> 其他天 &nbsp; <span class="num" style="width:16px;height:16px;line-height:16px;font-size:10px;box-shadow:none">1</span> 住宿 &nbsp; <span style="color:#2e7d32">●</span> 景点（点开有图）`;return d};
+legend.onAdd=()=>{const d=L.DomUtil.create("div","legend");d.innerHTML=`<span style="color:${css("--drive")}">━</span> 当天路线（OSM 路网，OSRM 计算）&nbsp; <span style="color:${css("--drive")}">┅</span> 土路 &nbsp; <span style="color:${css("--fly")}">┅</span> 航班<br><span style="color:${css("--route-dim")}">━</span> 其他天 &nbsp; <span class="num" style="width:16px;height:16px;line-height:16px;font-size:10px;box-shadow:none">1</span> 住宿 &nbsp; <span style="color:#2e7d32">●</span> 景点（点开有图）`;return d};
 legend.addTo(map);
 
 function arc(a,b){const r=[];for(let i=0;i<=40;i++){const t=i/40;r.push([a[0]+(b[0]-a[0])*t+Math.sin(Math.PI*t)*1.0,a[1]+(b[1]-a[1])*t])}return r}
 function legLine(id,opts){const r=ROUTES[id];if(!r)return null;return L.polyline(r.c,opts)}
 
 function draw(){
-  routeLayer.clearLayers();poiLayer.clearLayers();hlLayer.clearLayers();
+  routeLayer.clearLayers();casingLayer.clearLayers();poiLayer.clearLayers();hlLayer.clearLayers();const W=lineW();
   const P=PLANS[plan];const dimC=css("--route-dim"),drC=css("--drive"),flC=css("--fly");
   const bounds=[];
   // 其他天：灰色细线；当天：彩色粗线
@@ -353,11 +361,11 @@ function draw(){
     const on=dayIdx===-1||dayIdx===i;
     d.blocks.forEach(b=>{
       (b.leg||[]).forEach(id=>{
-        const pl=legLine(id,on?{color:drC,weight:5,opacity:.9,dashArray:DIRT.has(id)?"6 8":null}:{color:dimC,weight:2.5,opacity:.6});
-        if(!pl)return;pl.addTo(routeLayer);if(on)bounds.push(...pl.getLatLngs());
+        const pl=legLine(id,on?{color:drC,weight:W,opacity:1,dashArray:DIRT.has(id)?"6 10":null,lineCap:"round",lineJoin:"round"}:{color:dimC,weight:2.5,opacity:.6});
+        if(!pl)return;pl._on=on;pl.addTo(routeLayer);if(on){bounds.push(...pl.getLatLngs());legLine(id,{color:"#fff",weight:W+4,opacity:.9,lineCap:"round",lineJoin:"round",interactive:false}).addTo(casingLayer)}
         const r=ROUTES[id];
         pl.bindTooltip(`<b>${b.title}</b><br>${d.date} ${b.t}<br>${r.mi} mi · OSRM 估 ${fmtH(r.h)}（偏保守）`,{sticky:true});
-        pl.on("mouseover",()=>pl.setStyle({weight:on?8:5}));pl.on("mouseout",()=>pl.setStyle({weight:on?5:2.5}));
+        pl.on("mouseover",()=>pl.setStyle({weight:on?lineW()+3:5}));pl.on("mouseout",()=>pl.setStyle({weight:on?lineW():2.5}));
       });
       if(b.fly){const a=arc(POI[b.fly[0]].ll,POI[b.fly[1]].ll);const pl=L.polyline(a,{color:on?flC:dimC,weight:on?3:2,dashArray:"8 7",opacity:.9}).addTo(routeLayer);pl.bindTooltip(`<b>${b.title}</b><br>${d.date} ${b.t}`,{sticky:true});if(on)bounds.push(...a)}
     });
