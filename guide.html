@@ -62,7 +62,7 @@ function render(){
     <h3>要点</h3><ul class="tips">${g.tips.map(t=>`<li>${t}</li>`).join("")}</ul>
     ${xhs.length?`<h3>小红书原帖</h3><ul class="src">${xhs.map(s=>`<li><span class="tag xhs">小红书</span> <a href="${s.u}" target="_blank" rel="noopener">${s.t}</a> <span class="a">· @${s.a}</span></li>`).join("")}</ul>`:""}
     ${web.length?`<h3>网页资料</h3><ul class="src">${web.map(s=>`<li><span class="tag web">网页</span> <a href="${s.u}" target="_blank" rel="noopener">${s.t}</a> <span class="a">· ${s.a}</span></li>`).join("")}</ul>`:""}
-    ${g.status!=="xhs"?`<div class="pending">小红书实测笔记待补：x-mcp 的免费额度每天 30 次，2026-11-05 已用完，下次补上。</div>`:""}`;
+    ${g.status!=="xhs"?`<div class="pending">小红书上没有单独写这个点的笔记，以上为 BLM 等网页资料。</div>`:""}`;
   main.scrollTop=0;
 }
 addEventListener("hashchange",render);render();
