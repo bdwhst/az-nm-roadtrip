@@ -24,7 +24,7 @@ html,body{margin:0;height:100%;font-family:-apple-system,"PingFang SC","Noto San
 #nav small{display:block;color:inherit;opacity:.7;font-size:11px}
 #main{grid-area:main;overflow:auto;padding:18px 28px 40px;max-width:900px}
 .hero{display:flex;gap:18px;align-items:flex-start;margin-bottom:12px}
-.hero img{width:260px;max-width:40%;border-radius:8px;object-fit:cover;aspect-ratio:3/2}
+.hero>a{flex:none;width:260px;max-width:40%}.hero img{width:100%;border-radius:8px;object-fit:cover;aspect-ratio:3/2;display:block}
 .hero h2{margin:0 0 6px;font-size:22px}
 .meta{color:var(--ink3);font-size:12px}
 .summary{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--stay);border-radius:6px;padding:10px 14px;margin:12px 0}
@@ -35,7 +35,7 @@ ul.src a{color:var(--stay);text-decoration:none}ul.src a:hover{text-decoration:u
 ul.src .a{color:var(--ink3);font-size:12px}
 .pending{color:var(--ink3);font-style:italic;font-size:12.5px;margin-top:6px}
 .empty{color:var(--ink3);padding:40px 0;text-align:center}
-@media (max-width:760px){#app{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;grid-template-areas:"top" "nav" "main"}#nav{max-height:34vh;border-right:0;border-bottom:1px solid var(--line)}#main{padding:14px 16px}.hero{flex-direction:column}.hero img{max-width:100%;width:100%}}
+@media (max-width:760px){#app{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;grid-template-areas:"top" "nav" "main"}#nav{max-height:34vh;border-right:0;border-bottom:1px solid var(--line)}#main{padding:14px 16px}.hero{flex-direction:column}.hero>a{max-width:100%;width:100%}}
 </style>
 </head>
 <body>
