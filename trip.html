@@ -164,17 +164,17 @@ const POI={
 const B=(t,type,title,o={})=>Object.assign({t,type,title},o);
 const D=(date,dow,stay,sunset,blocks,note)=>({date,dow,stay,sunset,blocks,note});
 
-const day_phx_arrive=(car)=>D("12/24","四","Tempe","17:24",[
+const day_phx_arrive=(car)=>D("12/24","四","Scottsdale / Tempe","17:24",[
  B("13:00-14:30","log","PHX 落地 · 取车"+car,{poi:"phx",n:"到达时间按下午假设，按实际航班改"}),
- B("14:30-15:00","drive","PHX → Tempe",{leg:["phx_tempe"]}),
- B("15:00-16:15","rest","酒店入住 · 休整",{poi:"tempe"}),
- B("16:15-17:45","play","Papago Park · Hole-in-the-Rock 看日落",{poi:"papago",n:"日落 17:24，停车免费"}),
- B("18:00-19:30","meal","晚餐（Tempe Mill Ave）",{poi:"tempe"})]);
-const day_phx_xmas=D("12/25","五","Tempe","17:25",[
- B("10:00-12:00","play","South Mountain · Dobbins Lookout（可开车上去）",{poi:"southmtn",n:"圣诞节博物馆、植物园多关门，户外最稳"}),
- B("12:30-14:00","meal","午餐",{poi:"tempe",n:"提前查圣诞节营业的餐厅"}),
- B("14:30-16:30","play","Old Town Scottsdale 散步",{poi:"scottsdale"}),
- B("17:00-18:30","meal","圣诞晚餐",{poi:"scottsdale",n:"要订位"})],"圣诞节：缓冲日，倒时差、补给");
+ B("14:30-15:00","drive","PHX → 酒店（Scottsdale / Tempe）",{leg:["phx_tempe"]}),
+ B("15:00-16:15","rest","酒店入住 · 躺平休整",{poi:"tempe",n:"两晚同一家酒店，12/26 退房"}),
+ B("16:15-17:45","play","（可选）Papago Park · Hole-in-the-Rock 看日落，不去就继续躺",{poi:"papago",n:"车程 10 min；日落 17:24；小红书说日落时洞口排队拍照"}),
+ B("18:00-19:30","meal","晚餐（酒店附近 / Tempe Mill Ave）",{poi:"tempe"})],"落地日：只开 20 分钟，其余时间在酒店");
+const day_phx_xmas=D("12/25","五","Scottsdale / Tempe","17:25",[
+ B("10:00-12:30","rest","酒店躺平（睁眼就吃早饭，泳池 / 温泉 / 补觉）",{poi:"tempe",n:"圣诞节博物馆、植物园多关门，本来就没什么可去"}),
+ B("12:30-14:00","meal","午餐",{poi:"tempe",n:"提前查圣诞节营业的餐厅，很多店关门"}),
+ B("14:00-17:00","rest","酒店休整",{poi:"tempe",n:"想出门：South Mountain · Dobbins Lookout 开车上山看全城（往返 1 h），或 Old Town Scottsdale 散步"}),
+ B("17:00-18:30","meal","圣诞晚餐",{poi:"scottsdale",n:"一定要订位，圣诞当天开门的餐厅少"})],"圣诞节：整天在酒店，倒时差、补给；明早 10:00 退房出发");
 const day_to_gc=(date,dow,extra)=>D(date,dow,"Tusayan","17:19",[
  B("10:00-13:45","drive","Tempe → I-17 → Flagstaff → AZ-64 → Tusayan",{leg:["tempe_tusayan"],n:"230 mi · 3.5–3.75 h"}),
  B("13:45-14:30","meal","Tusayan 午餐 · 放行李",{poi:"tusayan"}),
@@ -184,15 +184,12 @@ const day_to_gc=(date,dow,extra)=>D(date,dow,"Tusayan","17:19",[
  B("16:45-17:30","play","日落（Hopi Point 或 Mather Point）",{poi:"hopi",n:"日落约 17:19，很冷，带手套"}),
  B("18:00-19:30","meal","晚餐（Tusayan）",{poi:"tusayan"})],extra);
 const day_gc_to_page=(date,dow)=>D(date,dow,"Page","17:18",[
- B("10:00-11:30","drive","Tusayan → Desert View Drive（Grandview、Lipan Point 停）",{leg:["tusayan_mather","mather_desertview"]}),
- B("11:30-12:30","play","Desert View Watchtower",{poi:"desertview"}),
- B("12:30-13:15","drive","Desert View → 东门出园 → Cameron",{leg:["desertview_cameron"]}),
- B("13:15-14:00","meal","Cameron Trading Post 午餐（Navajo taco）",{poi:"cameron"}),
- B("14:00-15:40","drive","Cameron → US-89 → Page",{leg:["cameron_page"],n:"82 mi · 1.5 h"}),
- B("15:40-15:55","drive","直接去 Horseshoe Bend（先不去酒店）",{leg:["page_horseshoe"]}),
- B("15:55-17:45","play","Horseshoe Bend（步行 1.5 mi 来回）看日落",{poi:"horseshoe",n:"停车 $10；日落约 17:18；无护栏"}),
- B("17:45-18:00","drive","回 Page 入住",{leg:["horseshoe_page"]}),
- B("18:15-19:30","meal","晚餐",{poi:"page",n:"Glen Canyon Dam 观景点改为可选：第二天出发前顺路 10 分钟"})]);
+ B("10:00-11:30","drive","Tusayan → AZ-64 东 → 东门出园 → Cameron",{leg:["tusayan_mather","mather_desertview","desertview_cameron"],n:"63 mi · 1.5 h；Desert View 瞭望塔就在路边，想停就停 15 min，不想停直接过；路肩临停会被罚 $190+，只进正规停车场"}),
+ B("11:30-12:15","meal","Cameron Trading Post 午餐（Navajo taco）",{poi:"cameron"}),
+ B("12:15-14:00","drive","Cameron → US-89 → Page",{leg:["cameron_page"],n:"82 mi · 1.5 h"}),
+ B("14:00-16:30","rest","Page 入住 · 休整",{poi:"page",n:"全天开车约 3 h，到了就歇"}),
+ B("16:30-17:45","play","（可选）Wahweap Overlook 看 Lake Powell 日落",{poi:"wahweap",n:"免费，车程 15 min，不用走路；Horseshoe Bend 也只有 10 min 车程，想去再去（$10，来回走 1.5 mi）"}),
+ B("18:00-19:30","meal","晚餐",{poi:"page",n:"Glen Canyon Dam 观景点可明早出发前顺路 10 min"})],"简化版：跳过 Desert View 停留和 Horseshoe Bend，下午全是自由时间");
 const day_mv=D("12/28","一","Monument Valley","17:15",[
  B("09:00-11:15","drive","Page → AZ-98 → US-160 → Kayenta → US-163 → Monument Valley",{leg:["page_mv"],n:"125 mi · 2.25 h；出发前可顺路 Glen Canyon Dam 观景点 10 min"}),
  B("11:15-13:15","play","17 英里自驾环线：John Ford's Point、Artist's Point、Totem Pole",{poi:"mvview",n:"冬季环线只开 8:00–14:00；砾石路普通车可走，雪后泥泞另说；门票 $8/人，国家公园年票无效"}),
