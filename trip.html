@@ -131,7 +131,7 @@ const POI={
  mv:{n:"Monument Valley（The View / Goulding's）",ll:[36.9822,-110.1115],kind:"stay"},
  mvview:{n:"Monument Valley 观景台 / 17 英里环线",ll:[36.9822,-110.1115],img:"monument_valley"},
  forrestgump:{n:"Forrest Gump Point（US-163 mile 13）",ll:[37.1014,-109.9907]},
- toadstool:{n:"Toadstool Hoodoos（Utah）",ll:[37.1032,-111.8763]},
+ toadstool:{n:"Toadstool Hoodoos（红白蘑菇石）",ll:[37.1032,-111.8763],img:"toadstool_hoodoos"},
  fourcorners:{n:"Four Corners Monument",ll:[36.9990,-109.0452],img:"four_corners"},
  shiprock:{n:"Shiprock 孤峰（远眺）",ll:[36.6872,-108.8368],img:"shiprock"},
  farmington:{n:"Farmington",ll:[36.7281,-108.2187],kind:"stay"},
@@ -187,9 +187,13 @@ const day_gc_to_page=(date,dow)=>D(date,dow,"Page","17:18",[
  B("10:00-11:30","drive","Tusayan → AZ-64 东 → 东门出园 → Cameron",{leg:["tusayan_mather","mather_desertview","desertview_cameron"],n:"63 mi · 1.5 h；Desert View 瞭望塔就在路边，想停就停 15 min，不想停直接过；路肩临停会被罚 $190+，只进正规停车场"}),
  B("11:30-12:15","meal","Cameron Trading Post 午餐（Navajo taco）",{poi:"cameron"}),
  B("12:15-14:00","drive","Cameron → US-89 → Page",{leg:["cameron_page"],n:"82 mi · 1.5 h"}),
- B("14:00-16:30","rest","Page 入住 · 休整",{poi:"page",n:"全天开车约 3 h，到了就歇"}),
- B("16:30-17:45","play","（可选）Wahweap Overlook 看 Lake Powell 日落",{poi:"wahweap",n:"免费，车程 15 min，不用走路；Horseshoe Bend 也只有 10 min 车程，想去再去（$10，来回走 1.5 mi）"}),
- B("18:00-19:30","meal","晚餐",{poi:"page",n:"Glen Canyon Dam 观景点可明早出发前顺路 10 min"})],"简化版：跳过 Desert View 停留和 Horseshoe Bend，下午全是自由时间");
+ B("14:00-14:30","log","Page 酒店放行李（或先不入住，直接去）",{poi:"page"}),
+ B("14:30-15:05","drive","Page → US-89 北 → 过 AZ/UT 州界牌 → Toadstool Hoodoos 停车场",{leg:["page_toadstool"],n:"29 mi · 35 min；12 月犹他和亚利桑那同一时间，不用调表；停车场就在公路边，轿车可到"}),
+ B("15:05-16:35","play","Toadstool Hoodoos：红蘑菇 → 绕到山北面白蘑菇，再走回来",{poi:"toadstool",n:"平路，来回 1.5–2 mi，1–1.5 h，小孩也轻松；无遮荫无厕所；小红书说红白两区是连通的，不用另找白蘑菇停车点；开 AllTrails 跟路线"}),
+ B("16:35-17:10","drive","回程 US-89 南 → Glen Canyon Dam Overlook",{leg:["toadstool_glencanyondam"],n:"27 mi · 35 min"}),
+ B("17:10-17:45","play","Glen Canyon Dam Overlook 看日落（大坝 + 拱桥 + 峡谷）",{poi:"glencanyondam",n:"日落 17:18；停车场走 2 分钟台阶到崖边；博主说这里比 Wahweap 看湖更震撼"}),
+ B("17:45-17:55","drive","→ Page 酒店入住",{leg:["glencanyondam_page"]}),
+ B("18:00-19:30","meal","晚餐（El Tapatio 墨西哥菜，小红书推荐，两人一份够）",{poi:"page",n:"饭后或第二天出发前顺路：Shell 加油站后面的 Biidi the Arch 小洞穴（1501 AZ-98），蹲洞里 0.5 倍广角出片，10 分钟"})],"简化版：不停 Desert View、不去 Horseshoe Bend；下午改去 Toadstool 蘑菇石（1.5 h 轻松步道），回程大坝观景点看日落");
 const day_mv=D("12/28","一","Monument Valley","17:15",[
  B("09:00-11:15","drive","Page → AZ-98 → US-160 → Kayenta → US-163 → Monument Valley",{leg:["page_mv"],n:"125 mi · 2.25 h；出发前可顺路 Glen Canyon Dam 观景点 10 min"}),
  B("11:15-13:15","play","17 英里自驾环线：John Ford's Point、Artist's Point、Totem Pole",{poi:"mvview",n:"冬季环线只开 8:00–14:00；砾石路普通车可走，雪后泥泞另说；门票 $8/人，国家公园年票无效"}),
