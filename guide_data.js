@@ -2,6 +2,19 @@
 // status: "xhs" = 已有小红书实测汇总; "web" = 小红书上没有单独写该点的笔记，用网页资料。
 const X=(t,a,u)=>({t,a,u,s:"xhs"}), W=(t,a,u)=>({t,a,u,s:"web"});
 window.GUIDES={
+ wahweap:{name:"Lake Powell 鲍威尔湖（Wahweap Overlook / Lone Rock Beach）",img:"wahweap_overlook",status:"xhs",updated:"2026-11-04",
+  summary:"Page 镇外 10–15 分钟就能看到鲍威尔湖：Wahweap Overlook 免费、停车场旁就是观景台；Lone Rock Beach 是湖边一块孤岩，车能开到水边；Glen Canyon Dam Overlook 看大坝和拱桥。三个点都在 US-89 边上，顺路串起来 1 小时。",
+  tips:[
+   "Wahweap Overlook：US-89 路边有指示牌拐上去，不经过收费站、免费；看 Wahweap 湾、Castle Rock 和码头，博主说「每一帧都像电脑桌面」。",
+   "Lone Rock Beach：过 AZ/UT 州界后右转，2 mi 沙土路到湖边，正常路况轿车可到，别开进软沙。在 Glen Canyon 游憩区收费范围内，$30/车 7 天，国家公园年票可用。冬天水位低，岩石离水较远，风大，适合拍背影和公路片感觉。",
+   "Glen Canyon Dam Overlook：停车场走几十级台阶到崖边，看大坝 + 拱桥 + 峡谷；菠萝油x 说比 Wahweap 看湖更震撼，天好日落绝美。Carl Hayden 游客中心可走上桥近距离看大坝。",
+   "日落顺序建议：Toadstool → Lone Rock → Wahweap Overlook 看日落，大坝观景点放第二天早上出发前 10 分钟。",
+   "湖上活动（游船、租船、Antelope Point 码头）冬天班次很少，不排。"],
+  sources:[
+   X("美国 28 天游 Day3：仿佛来自外星球的 Page 小镇（Wahweap Overlook、Lone Rock Beach、大坝）","爱吃西瓜葡萄的米","https://www.xiaohongshu.com/explore/693b8af9000000001f00bb7f"),
+   X("Page 小镇周边好逛不费力的观景点（大坝两个视角 vs Wahweap）","菠萝油x","https://www.xiaohongshu.com/explore/6abc9dc500000000180297b2"),
+   W("NPS · Glen Canyon NRA：Lone Rock Beach","National Park Service","https://www.nps.gov/glca/planyourvisit/lone-rock-beach.htm"),
+   W("NPS · Glen Canyon NRA：门票与年票","National Park Service","https://www.nps.gov/glca/planyourvisit/fees.htm")]},
  whitepocket:{name:"White Pocket（白口袋）",img:"white_pocket",status:"xhs",updated:"2026-11-05",
   summary:"景色值得，但到达难度高于 The Wave：最后 9 英里深沙 + 岔路迷路。不抽签、不要许可证、免费，无人机可飞。",
   tips:[

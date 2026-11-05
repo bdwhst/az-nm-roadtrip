@@ -46,7 +46,7 @@ ul.src .a{color:var(--ink3);font-size:12px}
 </div>
 <script src="guide_data.js"></script>
 <script>
-const ORDER=["papago","boynton","mather","hopi","desertview","horseshoe","toadstool","whitepocket","mvview","forrestgump","fourcorners","shiprock","bisti","ahshislepah","valleyofdreams","santafe","bandelier","whitesands","cloudcroft","caverns","guadalupe"];
+const ORDER=["papago","boynton","mather","hopi","desertview","horseshoe","toadstool","wahweap","whitepocket","mvview","forrestgump","fourcorners","shiprock","bisti","ahshislepah","valleyofdreams","santafe","bandelier","whitesands","cloudcroft","caverns","guadalupe"];
 const keys=ORDER.filter(k=>GUIDES[k]).concat(Object.keys(GUIDES).filter(k=>!ORDER.includes(k)));
 const nav=document.getElementById("nav"),main=document.getElementById("main");
 nav.innerHTML=keys.map(k=>{const g=GUIDES[k];return `<a href="#${k}" data-k="${k}">${g.img?`<img src="images/mini/${g.img}.jpg" alt="">`:`<span class="ph"></span>`}<span>${g.name}<small>${g.status==="xhs"?"小红书 "+g.sources.filter(s=>s.s==="xhs").length+" 篇":"网页资料"}</small></span></a>`}).join("");
