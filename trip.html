@@ -135,6 +135,7 @@ const POI={
  toadstool:{n:"Toadstool Hoodoos（红白蘑菇石）",ll:[37.1032,-111.8763],img:"toadstool_hoodoos"},
  fourcorners:{n:"Four Corners Monument",ll:[36.9990,-109.0452],img:"four_corners"},
  shiprock:{n:"Shiprock 孤峰（远眺）",ll:[36.6872,-108.8368],img:"shiprock"},
+ kayenta:{n:"Kayenta",ll:[36.7278,-110.2545]},
  farmington:{n:"Farmington",ll:[36.7281,-108.2187],kind:"stay"},
  bisti:{n:"Bisti / De-Na-Zin 停车场",ll:[36.2587,-108.2516],img:"bisti_badlands"},
  ahshislepah:{n:"Ah-Shi-Sle-Pah 停车场（约）",ll:[36.1517,-107.9620],img:"ah_shi_sle_pah"},
@@ -207,7 +208,8 @@ const day_mv=D("12/28","一","Monument Valley","17:15",[
  B("15:30-16:00","drive","回 Monument Valley",{leg:["forrestgump_mv"]}),
  B("16:00-16:30","rest","休整",{poi:"mv"}),
  B("16:30-17:30","play","观景台 / 房间阳台看日落",{poi:"mvview",n:"日落约 17:15"}),
- B("18:00-19:30","meal","晚餐（The View 或 Goulding's）",{poi:"mv"})],"圣诞周 The View / Goulding's 常满房，先订");
+ B("18:00-19:30","meal","晚餐（The View 或 Goulding's）",{poi:"mv"}),
+ B("19:30-21:30","play","拍星空：阳台 / 酒店停车场朝东，猎户座 + 冬季银河升在 Mittens 上方",{poi:"mvview",n:"12/28 月亮 22:57 才升（亏凸月 71%），18:45 天全黑到 23:00 前没有月光，是全程最好的星空夜，天空 Bortle 2 级。银河核心（夏天那种）12 月看不到，太阳就在那个方向；能拍的是冬季银河（猎户臂）：19–22 点从东南（天狼星）经猎户座、双子、御夫座过头顶到西北仙后座，淡一条带，f/2.8、ISO 3200–6400、15–20 s 能拍出来，猎户座大星云、昴星团也能出。木星整晚很亮在东边。约 -8℃，三脚架、手套、暖宝宝、备用电池。酒店范围内随便拍；要进园区到 John Ford's Point 等机位，必须报纳瓦霍向导夜拍 / 观星团（The View 前台可订，约 $100+/人，提前订）"})],"圣诞周 The View / Goulding's 常满房，先订；订 The View 要选朝 Mittens 的房（阳台直接拍）");
 const day_page_fly=(date,dow)=>D(date,dow,"Page","17:19",[
  B("10:00-10:45","drive","Page → US-89 北 → Toadstool Hoodoos 停车场",{leg:["page_toadstool"]}),
  B("10:45-12:30","play","Toadstool Hoodoos（来回 1.5 mi，平路）",{poi:"toadstool"}),
@@ -217,15 +219,16 @@ const day_page_fly=(date,dow)=>D(date,dow,"Page","17:19",[
  B("16:00-17:30","rest","休整（可再去 Horseshoe Bend 日落）",{poi:"page"}),
  B("18:00-19:30","meal","晚餐",{poi:"page"})]);
 const day_to_farmington_orig=D("12/29","二","Farmington","16:58",[
- B("07:15-07:50","play","（可选）阳台 / 观景台看日出，Mittens 剪影",{poi:"mvview",n:"日出约 7:30，看完回去接着睡"}),
- B("09:00-11:00","drive","Monument Valley → Kayenta → US-160 → Four Corners",{leg:["mv_fourcorners"],n:"97 mi · 2 h"}),
- B("11:00-11:30","play","Four Corners Monument",{poi:"fourcorners",n:"Navajo Parks 管理，元旦前后开放时间先查"}),
- B("11:30-13:30","drive","Four Corners → US-64 → Shiprock 远眺 → Farmington",{leg:["fourcorners_farmington"],n:"96 mi"}),
- B("13:30-14:00","meal","Farmington 快午餐",{poi:"farmington"}),
+ B("07:15-07:50","play","（可选）阳台 / 观景台看日出，Mittens 剪影",{poi:"mvview",n:"日出约 7:33，看完回去接着睡"}),
+ B("10:00-10:30","drive","Monument Valley → US-163 → Kayenta",{leg:["mv_kayenta"],n:"Kayenta 加满油"}),
+ B("10:30-12:30","drive","Kayenta → US-160 东 → Teec Nos Pos → US-64",{leg:["kayenta_farmington"],n:"128 mi；Four Corners 就在 Teec Nos Pos 路口（不去：$8/人、评价两极）；US-64 上 Shiprock 孤峰远眺停 10 min 拍照"}),
+ B("12:30-12:45","play","Shiprock 孤峰远眺（US-64 路肩 / Indian Service Rte 13 口）",{poi:"shiprock"}),
+ B("12:45-13:15","drive","→ Farmington",{n:"30 mi，里程已含在上一段"}),
+ B("13:15-14:00","meal","Farmington 午餐",{poi:"farmington"}),
  B("14:00-14:45","drive","Farmington → NM-371 南 → Bisti 停车场",{leg:["farmington_bisti"],n:"36 mi，最后 2 mi 砾石路，普通车可到"}),
  B("14:45-17:15","play","Bisti Badlands：Cracked Eggs / Wings，看日落",{poi:"bisti",n:"无步道，提前下载 GPS 轨迹；日落 16:58；雨雪后泥路不可走"}),
  B("17:15-18:00","drive","回 Farmington",{leg:["bisti_farmington"]}),
- B("18:15-19:30","meal","晚餐 · 入住",{poi:"farmington"})],"天气是一票否决：下雨下雪就不去 Bisti，改 Farmington 休整");
+ B("18:15-19:30","meal","晚餐 · 入住",{poi:"farmington"})],"不去 Four Corners，10:00 出发即可；天气是一票否决：下雨下雪就不去 Bisti，改 Farmington 休整");
 const day_to_farmington_fly=D("12/29","二","Farmington","16:58",[
  B("09:00-12:15","drive","Albuquerque → US-550（Cuba、Nageezi）→ Farmington",{leg:["oldtown_farmington"],n:"184 mi · 3 h"}),
  B("12:15-13:00","meal","Farmington 午餐 · 放行李",{poi:"farmington"}),
@@ -332,7 +335,7 @@ const PLANS={
      B("17:50-18:30","log","ABQ 取车 ②",{poi:"abq"}),
      B("18:30-18:50","drive","ABQ → Old Town",{leg:["abq_oldtown"]}),
      B("19:00-20:30","meal","Old Town 晚餐 · 入住",{poi:"abqoldtown"})],"全程最累的一天：开车 4.5 h + 还车 + 飞行 + 取车"),
-   day_to_farmington_fly,day_badlands,day_to_alamogordo,day_to_carlsbad,day_caverns,day_to_elp(" ②")]}
+   day_to_farmington_fly,day_badlands,day_to_alamogordo(),day_to_carlsbad,day_caverns,day_to_elp(" ②")]}
 };
 const DIRT=new Set(["farmington_ahshislepah","ahshislepah_vod","vod_nageezi","page_whitepocket","whitepocket_page"]); // 土路路段（地图上画虚线）
 const TYPE={drive:["开车","--drive"],dirt:["土路","--drive"],play:["游玩","--play"],meal:["用餐","--meal"],log:["手续 / 机场 / 入住","--log"],rest:["休整","--rest"],fly:["航班","--fly"]};
@@ -379,7 +382,7 @@ const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim
 const hm=s=>{const [h,m]=s.split(":").map(Number);return h+m/60};
 const span=t=>t.split("-").map(hm);
 const fmtH=h=>{const x=Math.round(h*4)/4;return x%1===0?x+" h":x.toFixed(2).replace(/\.?0+$/,"")+" h"};
-const X0=7,X1=21; // 时间轴 07:00–21:00
+const X0=7,X1=22; // 时间轴 07:00–22:00（12/28 晚拍星空到 21:30）
 const dayLegs=d=>d.blocks.flatMap(b=>b.leg||[]);
 const dayMi=d=>dayLegs(d).reduce((s,l)=>s+(ROUTES[l]?ROUTES[l].mi:0),0);
 const dayDriveH=d=>d.blocks.filter(b=>b.type==="drive"||b.type==="dirt").reduce((s,b)=>{const [a,z]=span(b.t);return s+z-a},0);
