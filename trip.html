@@ -96,7 +96,7 @@ html,body{margin:0;height:100%;font-family:-apple-system,"PingFang SC","Noto San
     <h1>美西南自驾 · 12/24 → 1/3</h1>
     <div class="seg" id="plans"></div>
     <div id="days"></div>
-    <div class="seg" style="margin-left:auto"><button id="costBtn">费用</button><button id="themeBtn" title="切换深色/浅色">◐</button></div>
+    <div class="seg" style="margin-left:auto"><button id="guideBtn">攻略</button><button id="costBtn">费用</button><button id="themeBtn" title="切换深色/浅色">◐</button></div>
   </div>
   <div id="side"></div>
   <div id="map"></div>
@@ -351,6 +351,7 @@ function renderCost(){
    <div class="meta">${r.quotedOn?"报价日期 "+r.quotedOn:"尚未查询报价"}</div>`).join("")+
    `<div class="meta" style="margin-top:10px">说明：Avis 公开价和谷歌员工租车 portal 的企业价不同，portal 价以用户自己跑的报价为准。Enterprise / National 机场之间的 one-way 通常不收 drop charge，可作对照。</div>`;
 }
+document.getElementById("guideBtn").onclick=()=>open("guide.html","_blank");
 document.getElementById("costBtn").onclick=()=>{renderCost();document.getElementById("cost").hidden=false};
 document.getElementById("costClose").onclick=()=>document.getElementById("cost").hidden=true;
 document.addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("cost").hidden=true});
@@ -438,7 +439,7 @@ function draw(){
     const when=P.days.flatMap((dd,j)=>dd.blocks.filter(x=>x.poi===b.poi&&x.type==="play").map(x=>`${dd.date} ${x.t}`)).join("<br>");
     let m;
     if(p.img){
-      m=L.marker(p.ll,{icon:L.divIcon({className:"picwrap",html:`<div class="pic ${on?"":"dim"}" title="${p.n}"><img src="images/mini/${p.img}.jpg" alt=""><div class="cap"><b>${p.n}</b><br><span style="color:#777">${when}</span><br><a href="images/${p.img}.jpg" target="_blank">查看原图 ↗</a></div></div>`,iconSize:[0,0],iconAnchor:[0,0]}),zIndexOffset:on?300:100}).addTo(poiLayer);
+      m=L.marker(p.ll,{icon:L.divIcon({className:"picwrap",html:`<div class="pic ${on?"":"dim"}" title="${p.n}"><img src="images/mini/${p.img}.jpg" alt=""><div class="cap"><b>${p.n}</b><br><span style="color:#777">${when}</span><br><a href="guide.html#${b.poi}" target="_blank" style="font-weight:600">📖 攻略 ↗</a> &nbsp;·&nbsp; <a href="images/${p.img}.jpg" target="_blank">查看原图 ↗</a></div></div>`,iconSize:[0,0],iconAnchor:[0,0]}),zIndexOffset:on?300:100}).addTo(poiLayer);
       m.on("click",e=>{L.DomEvent.stop(e);const el=m.getElement().querySelector(".pic");
         if(bigPic&&bigPic.el===el){collapsePic();return}
         collapsePic();el.classList.add("big");el.querySelector("img").src=`images/thumbs/${p.img}.jpg`;m.setZIndexOffset(2000);

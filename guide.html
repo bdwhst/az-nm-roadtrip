@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>景点攻略 · 美西南自驾</title>
+<style>
+:root{--bg:#fcfcfb;--panel:#f4f3f0;--line:#e2e1dc;--ink:#0b0b0b;--ink2:#52514e;--ink3:#8a8984;--card:#fff;--stay:#1f4e79;--xhs:#e34948;--web:#2a78d6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1a19;--panel:#222221;--line:#3a3a37;--ink:#fff;--ink2:#c3c2b7;--ink3:#8f8e88;--card:#262625;--stay:#6aa0d8;--xhs:#e66767;--web:#3987e5}}
+:root[data-theme="dark"]{--bg:#1a1a19;--panel:#222221;--line:#3a3a37;--ink:#fff;--ink2:#c3c2b7;--ink3:#8f8e88;--card:#262625;--stay:#6aa0d8;--xhs:#e66767;--web:#3987e5}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:-apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);font-size:14px;line-height:1.6}
+#app{display:grid;grid-template-columns:300px 1fr;grid-template-rows:auto 1fr;grid-template-areas:"top top" "nav main";height:100%}
+#top{grid-area:top;display:flex;align-items:center;gap:14px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+#top h1{font-size:16px;margin:0}
+#top a{color:var(--ink2);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:12.5px;background:var(--card)}
+#top .lg{margin-left:auto;font-size:12px;color:var(--ink3);display:flex;gap:12px}
+.tag{display:inline-block;padding:0 6px;border-radius:3px;color:#fff;font-size:11px;font-weight:600;line-height:17px;vertical-align:1px}
+.tag.xhs{background:var(--xhs)}.tag.web{background:var(--web)}
+#nav{grid-area:nav;overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:8px}
+#nav a{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:13px}
+#nav a:hover{background:var(--card)}#nav a.on{background:var(--stay);color:#fff}
+#nav img,#nav .ph{width:40px;height:30px;object-fit:cover;border-radius:4px;background:var(--line);flex:none}
+#nav small{display:block;color:inherit;opacity:.7;font-size:11px}
+#main{grid-area:main;overflow:auto;padding:18px 28px 40px;max-width:900px}
+.hero{display:flex;gap:18px;align-items:flex-start;margin-bottom:12px}
+.hero img{width:260px;max-width:40%;border-radius:8px;object-fit:cover;aspect-ratio:3/2}
+.hero h2{margin:0 0 6px;font-size:22px}
+.meta{color:var(--ink3);font-size:12px}
+.summary{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--stay);border-radius:6px;padding:10px 14px;margin:12px 0}
+h3{font-size:15px;margin:18px 0 6px;border-bottom:1px solid var(--line);padding-bottom:3px}
+ul.tips{padding-left:20px;margin:0}ul.tips li{margin:6px 0}
+ul.src{list-style:none;padding:0;margin:0}ul.src li{padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+ul.src a{color:var(--stay);text-decoration:none}ul.src a:hover{text-decoration:underline}
+ul.src .a{color:var(--ink3);font-size:12px}
+.pending{color:var(--ink3);font-style:italic;font-size:12.5px;margin-top:6px}
+.empty{color:var(--ink3);padding:40px 0;text-align:center}
+@media (max-width:760px){#app{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;grid-template-areas:"top" "nav" "main"}#nav{max-height:34vh;border-right:0;border-bottom:1px solid var(--line)}#main{padding:14px 16px}.hero{flex-direction:column}.hero img{max-width:100%;width:100%}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top"><h1>景点攻略</h1><a href="trip.html">← 回行程地图</a><span class="lg"><span><span class="tag xhs">小红书</span> 实测笔记汇总</span><span><span class="tag web">网页</span> 官方 / 博客资料</span></span></div>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<script src="guide_data.js"></script>
+<script>
+const ORDER=["papago","boynton","mather","hopi","desertview","horseshoe","whitepocket","mvview","forrestgump","fourcorners","shiprock","bisti","ahshislepah","valleyofdreams","santafe","bandelier","whitesands","cloudcroft","caverns","guadalupe"];
+const keys=ORDER.filter(k=>GUIDES[k]).concat(Object.keys(GUIDES).filter(k=>!ORDER.includes(k)));
+const nav=document.getElementById("nav"),main=document.getElementById("main");
+nav.innerHTML=keys.map(k=>{const g=GUIDES[k];return `<a href="#${k}" data-k="${k}">${g.img?`<img src="images/mini/${g.img}.jpg" alt="">`:`<span class="ph"></span>`}<span>${g.name}<small>${g.status==="xhs"?"小红书 "+g.sources.filter(s=>s.s==="xhs").length+" 篇":"网页资料"}</small></span></a>`}).join("");
+function render(){
+  const k=decodeURIComponent(location.hash.slice(1))||keys[0];
+  nav.querySelectorAll("a").forEach(a=>a.classList.toggle("on",a.dataset.k===k));
+  const g=GUIDES[k];
+  if(!g){main.innerHTML=`<div class="empty">这个地点还没有攻略。<br><a href="#${keys[0]}">看看其他景点</a></div>`;return}
+  const xhs=g.sources.filter(s=>s.s==="xhs"),web=g.sources.filter(s=>s.s==="web");
+  main.innerHTML=`<div class="hero">${g.img?`<a href="images/${g.img}.jpg" target="_blank"><img src="images/thumbs/${g.img}.jpg" alt=""></a>`:""}
+    <div><h2>${g.name}</h2><div class="meta">${g.status==="xhs"?`<span class="tag xhs">小红书</span> 精读 ${xhs.filter(s=>!/未精读/.test(s.t)).length} 篇`:`<span class="tag web">网页</span> 小红书待补`} · 更新 ${g.updated}</div>
+    <div class="summary">${g.summary}</div></div></div>
+    <h3>要点</h3><ul class="tips">${g.tips.map(t=>`<li>${t}</li>`).join("")}</ul>
+    ${xhs.length?`<h3>小红书原帖</h3><ul class="src">${xhs.map(s=>`<li><span class="tag xhs">小红书</span> <a href="${s.u}" target="_blank" rel="noopener">${s.t}</a> <span class="a">· @${s.a}</span></li>`).join("")}</ul>`:""}
+    ${web.length?`<h3>网页资料</h3><ul class="src">${web.map(s=>`<li><span class="tag web">网页</span> <a href="${s.u}" target="_blank" rel="noopener">${s.t}</a> <span class="a">· ${s.a}</span></li>`).join("")}</ul>`:""}
+    ${g.status!=="xhs"?`<div class="pending">小红书实测笔记待补：x-mcp 的免费额度每天 30 次，2026-11-05 已用完，下次补上。</div>`:""}`;
+  main.scrollTop=0;
+}
+addEventListener("hashchange",render);render();
+</script>
+</body>
+</html>
